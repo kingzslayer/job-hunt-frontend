@@ -1,0 +1,11 @@
+export { CTA } from './cta';
+export { FAQ } from './faq';
+export { Features } from './features';
+export { Footer } from './footer';
+export { Header } from './header';
+export { Hero } from './hero';
+export { HeroDialog } from './hero-dialog';
+export { Integrations } from './integrations';
+export { Pricing } from './pricing';
+export { SocialProof } from './social-proof';
+export { Testimonial } from './testimonial';
