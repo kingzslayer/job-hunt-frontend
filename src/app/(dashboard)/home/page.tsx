@@ -82,7 +82,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-4 sm:gap-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -124,8 +124,8 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-1 lg:col-span-1">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="col-span-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle>AI Insights</CardTitle>
@@ -145,7 +145,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 lg:col-span-2">
+        <Card className="col-span-1 md:col-span-1 lg:col-span-2">
           <CardHeader>
             <CardTitle>Application Status</CardTitle>
             <CardDescription>Track your application progress</CardDescription>
@@ -203,7 +203,7 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>AI Job Matches</CardTitle>
@@ -213,7 +213,7 @@ export default function HomePage() {
             <div className="space-y-4">
               {recommendedJobs.map((job, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="font-medium">{job.title}</p>
                       <p className="text-muted-foreground text-sm">{job.company}</p>
@@ -224,7 +224,7 @@ export default function HomePage() {
                       {job.matchScore}% Match
                     </div>
                   </div>
-                  <div className="text-muted-foreground flex items-center justify-between text-xs">
+                  <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-2 text-xs">
                     <span>{job.salary}</span>
                     <span>{job.location}</span>
                   </div>
@@ -297,7 +297,7 @@ export default function HomePage() {
             <div className="space-y-4">
               {recentActivity.map((activity, i) => (
                 <div key={i} className="flex flex-col space-y-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-medium">{activity.activity}</p>
                     <p className="text-muted-foreground text-sm">{activity.date}</p>
                   </div>

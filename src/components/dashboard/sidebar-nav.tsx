@@ -3,16 +3,22 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { dashboardRoutes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
-import { Brain, CreditCard } from 'lucide-react';
+import { Brain, CreditCard, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   defaultCollapsed?: boolean;
+  onClose?: () => void;
 }
 
-export function SidebarNav({ className, defaultCollapsed = false, ...props }: SidebarNavProps) {
+export function SidebarNav({
+  className,
+  defaultCollapsed = false,
+  onClose,
+  ...props
+}: SidebarNavProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const pathname = usePathname();
 
@@ -36,8 +42,20 @@ export function SidebarNav({ className, defaultCollapsed = false, ...props }: Si
           <div className="text-primary">
             <Brain className="h-6 w-6" />
           </div>
-          {!collapsed && <div className="ml-2 text-xl font-semibold">JobHunt AI</div>}
+          {!collapsed && (
+            <div className="ml-2 text-xl font-semibold">
+              ApplyBrain <span className="text-primary">AI</span>
+            </div>
+          )}
         </div>
+
+        {/* Close button for mobile - only shown when onClose is provided */}
+        {onClose && (
+          <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden">
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close sidebar</span>
+          </Button>
+        )}
       </div>
 
       {/* Navigation items */}
@@ -48,6 +66,7 @@ export function SidebarNav({ className, defaultCollapsed = false, ...props }: Si
             <Link
               key={route.href}
               href={route.href}
+              onClick={onClose} // Close sidebar on navigation on mobile
               className={cn(
                 'relative flex items-center rounded-md text-sm',
                 isActive

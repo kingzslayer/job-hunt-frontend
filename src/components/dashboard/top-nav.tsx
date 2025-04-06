@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Bell, Check, HelpCircle, LogOut, Search, Settings, User } from 'lucide-react';
+import { Bell, Check, HelpCircle, LogOut, Menu, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -14,7 +14,12 @@ import {
 } from '../ui/dropdown-menu';
 import { Input } from '../ui/input';
 
-export function TopNav({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
+interface TopNavProps extends React.HTMLAttributes<HTMLElement> {
+  showSidebarButton?: boolean;
+  onSidebarOpen?: () => void;
+}
+
+export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }: TopNavProps) {
   // Dummy data
   const user = {
     name: 'John Doe',
@@ -51,8 +56,16 @@ export function TopNav({ className, ...props }: React.HTMLAttributes<HTMLElement
 
   return (
     <div className={cn('bg-card flex h-16 items-center border-b px-4', className)} {...props}>
+      {/* Mobile sidebar toggle button */}
+      {showSidebarButton && onSidebarOpen && (
+        <Button variant="ghost" size="icon" onClick={onSidebarOpen} className="mr-2 lg:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open sidebar</span>
+        </Button>
+      )}
+
       <div className="ml-auto flex items-center gap-4">
-        <div className="relative flex items-center">
+        <div className="relative hidden items-center md:flex">
           <Search className="text-muted-foreground absolute left-2.5 h-4 w-4" />
           <Input type="search" placeholder="Search jobs, companies..." className="w-[250px] pl-9" />
         </div>
@@ -151,7 +164,7 @@ export function TopNav({ className, ...props }: React.HTMLAttributes<HTMLElement
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link
-                href="/logout"
+                href="/"
                 className="text-destructive focus:text-destructive w-full cursor-pointer"
               >
                 <LogOut className="mr-2 h-4 w-4" />

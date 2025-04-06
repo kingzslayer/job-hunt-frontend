@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GalleryVerticalEnd, Loader2 } from 'lucide-react';
+import { Brain, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,11 +64,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
         <div className="flex flex-col items-center gap-2">
           <Link href="/" className="flex flex-col items-center gap-2 font-medium">
             <div className="flex size-8 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-6" />
+              <Brain className="text-primary size-6" />
             </div>
-            <span className="sr-only">ColdAI</span>
+            <span className="sr-only">ApplyBrain AI</span>
           </Link>
-          <h1 className="text-xl font-bold">Welcome to ColdAI</h1>
+          <h1 className="text-xl font-bold">
+            Welcome to ApplyBrain <span className="text-primary">AI</span>
+          </h1>
           <div className="text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/auth/signup" className="underline underline-offset-4">

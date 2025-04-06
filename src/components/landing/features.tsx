@@ -3,20 +3,20 @@ import { BotIcon, Search, Zap } from 'lucide-react';
 
 export function Features() {
   return (
-    <section className="bg-muted/50 py-20">
+    <section className="bg-muted/50 py-12 sm:py-16 md:py-20">
       <div className="container mx-auto px-4">
-        <h2 className="text-center text-3xl font-bold">How It Works</h2>
-        <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-center">
+        <h2 className="text-center text-2xl font-bold sm:text-3xl md:text-4xl">How It Works</h2>
+        <p className="text-muted-foreground mx-auto mt-3 max-w-xs text-center text-sm sm:mt-4 sm:max-w-lg sm:text-base md:max-w-2xl">
           Our AI does the hard work of finding the right people and crafting personalized messages
         </p>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:mt-12 md:mt-16 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           <Card>
             <CardHeader>
-              <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                <Search className="text-primary h-6 w-6" />
+              <div className="bg-primary/10 mb-4 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
+                <Search className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <CardTitle>Target Identification</CardTitle>
+              <CardTitle className="text-xl">Target Identification</CardTitle>
               <CardDescription>
                 Our AI finds the right decision-makers based on your preferences
               </CardDescription>
@@ -31,10 +31,10 @@ export function Features() {
 
           <Card>
             <CardHeader>
-              <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                <BotIcon className="text-primary h-6 w-6" />
+              <div className="bg-primary/10 mb-4 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
+                <BotIcon className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <CardTitle>Email Crafting</CardTitle>
+              <CardTitle className="text-xl">Email Crafting</CardTitle>
               <CardDescription>Personalized outreach messages that get responses</CardDescription>
             </CardHeader>
             <CardContent>
@@ -45,12 +45,12 @@ export function Features() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="md:col-span-2 lg:col-span-1">
             <CardHeader>
-              <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                <Zap className="text-primary h-6 w-6" />
+              <div className="bg-primary/10 mb-4 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
+                <Zap className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <CardTitle>Automated Follow-up</CardTitle>
+              <CardTitle className="text-xl">Automated Follow-up</CardTitle>
               <CardDescription>Never miss an opportunity with smart follow-ups</CardDescription>
             </CardHeader>
             <CardContent>

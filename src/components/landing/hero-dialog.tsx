@@ -31,22 +31,24 @@ export function HeroDialog() {
       <DialogContent className="overflow-hidden p-0 sm:max-w-[850px]">
         <div className="bg-primary text-primary-foreground p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Experience ColdAI Connect</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">
+              Experience ApplyBrain <span className="text-primary-foreground/90">AI</span>
+            </DialogTitle>
             <DialogDescription className="text-primary-foreground/90 text-base">
               Our powerful AI workflow gets you interviews, not rejections
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto p-6">
+        <div className="max-h-[70vh] overflow-x-hidden overflow-y-auto p-6">
           <div className="space-y-8">
-            <div className="group flex items-start gap-6">
+            <div className="group flex flex-wrap items-start gap-4 sm:flex-nowrap sm:gap-6">
               <div className="bg-primary/10 border-primary/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
                 <span className="text-primary text-lg font-bold">1</span>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-xl font-bold">
+                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-bold">
                     <Search className="text-primary h-5 w-5" />
                     Set Your Target Parameters
                   </h3>
@@ -58,24 +60,24 @@ export function HeroDialog() {
                 <div className="overflow-hidden rounded-lg border shadow-sm">
                   <div className="bg-muted/30 p-4">
                     <div className="flex flex-col gap-3">
-                      <div className="bg-background flex items-center gap-2 rounded-md p-3 shadow-sm">
+                      <div className="bg-background flex flex-wrap items-center gap-2 rounded-md p-3 shadow-sm">
                         <div className="bg-primary/10 rounded-full p-2">
                           <LayersIcon className="text-primary h-4 w-4" />
                         </div>
                         <span className="font-medium">Target Companies</span>
-                        <div className="ml-auto flex gap-1">
+                        <div className="ml-auto flex flex-wrap gap-1">
                           <span className="bg-primary/5 rounded-md px-2 py-1 text-xs">Airbnb</span>
                           <span className="bg-primary/5 rounded-md px-2 py-1 text-xs">Stripe</span>
                           <span className="bg-primary/5 rounded-md px-2 py-1 text-xs">+ Add</span>
                         </div>
                       </div>
 
-                      <div className="bg-background flex items-center gap-2 rounded-md p-3 shadow-sm">
+                      <div className="bg-background flex flex-wrap items-center gap-2 rounded-md p-3 shadow-sm">
                         <div className="bg-primary/10 rounded-full p-2">
                           <Users className="text-primary h-4 w-4" />
                         </div>
                         <span className="font-medium">Target Roles</span>
-                        <div className="ml-auto flex gap-1">
+                        <div className="ml-auto flex flex-wrap gap-1">
                           <span className="bg-primary/5 rounded-md px-2 py-1 text-xs">
                             Product Manager
                           </span>
@@ -83,12 +85,12 @@ export function HeroDialog() {
                         </div>
                       </div>
 
-                      <div className="bg-background flex items-center gap-2 rounded-md p-3 shadow-sm">
+                      <div className="bg-background flex flex-wrap items-center gap-2 rounded-md p-3 shadow-sm">
                         <div className="bg-primary/10 rounded-full p-2">
                           <MessageSquareIcon className="text-primary h-4 w-4" />
                         </div>
                         <span className="font-medium">Experience Level</span>
-                        <div className="ml-auto flex gap-1">
+                        <div className="ml-auto flex flex-wrap gap-1">
                           <span className="bg-primary/5 rounded-md px-2 py-1 text-xs">
                             Mid-Senior
                           </span>
@@ -100,13 +102,13 @@ export function HeroDialog() {
               </div>
             </div>
 
-            <div className="group flex items-start gap-6">
+            <div className="group flex flex-wrap items-start gap-4 sm:flex-nowrap sm:gap-6">
               <div className="bg-primary/10 border-primary/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
                 <span className="text-primary text-lg font-bold">2</span>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-xl font-bold">
+                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-bold">
                     <BotIcon className="text-primary h-5 w-5" />
                     AI Prospect Discovery
                   </h3>
@@ -118,8 +120,8 @@ export function HeroDialog() {
 
                 <div className="overflow-hidden rounded-lg border shadow-sm">
                   <div className="bg-muted/30 p-4">
-                    <div className="bg-background mb-2 flex items-center justify-between rounded-md p-3 shadow-sm">
-                      <div className="flex items-center gap-2">
+                    <div className="bg-background mb-2 flex flex-wrap items-center justify-between rounded-md p-3 shadow-sm">
+                      <div className="mb-2 flex items-center gap-2 sm:mb-0">
                         <div className="bg-primary/10 h-8 w-8 rounded-full"></div>
                         <div>
                           <div className="font-medium">Sarah Johnson</div>
@@ -136,8 +138,8 @@ export function HeroDialog() {
                       </div>
                     </div>
 
-                    <div className="bg-background mb-2 flex items-center justify-between rounded-md p-3 shadow-sm">
-                      <div className="flex items-center gap-2">
+                    <div className="bg-background mb-2 flex flex-wrap items-center justify-between rounded-md p-3 shadow-sm">
+                      <div className="mb-2 flex items-center gap-2 sm:mb-0">
                         <div className="bg-primary/10 h-8 w-8 rounded-full"></div>
                         <div>
                           <div className="font-medium">Michael Chen</div>
@@ -154,8 +156,8 @@ export function HeroDialog() {
                       </div>
                     </div>
 
-                    <div className="bg-background flex items-center justify-between rounded-md p-3 shadow-sm">
-                      <div className="flex items-center gap-2">
+                    <div className="bg-background flex flex-wrap items-center justify-between rounded-md p-3 shadow-sm">
+                      <div className="mb-2 flex items-center gap-2 sm:mb-0">
                         <div className="bg-primary/10 h-8 w-8 rounded-full"></div>
                         <div>
                           <div className="font-medium">Alex Rodriguez</div>
@@ -176,13 +178,13 @@ export function HeroDialog() {
               </div>
             </div>
 
-            <div className="group flex items-start gap-6">
+            <div className="group flex flex-wrap items-start gap-4 sm:flex-nowrap sm:gap-6">
               <div className="bg-primary/10 border-primary/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
                 <span className="text-primary text-lg font-bold">3</span>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-xl font-bold">
+                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-bold">
                     <MessageSquareIcon className="text-primary h-5 w-5" />
                     Hyper-Personalized Outreach
                   </h3>
@@ -195,13 +197,13 @@ export function HeroDialog() {
                 <div className="overflow-hidden rounded-lg border shadow-sm">
                   <div className="bg-muted/30 p-4">
                     <div className="bg-background rounded-md p-4 shadow-sm">
-                      <div className="mb-2 flex items-center gap-2">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
                         <Mail className="text-primary h-4 w-4" />
                         <div className="font-semibold">
                           To: Sarah Johnson (Head of Product @ Airbnb)
                         </div>
                       </div>
-                      <div className="bg-muted/30 rounded-md p-3 text-sm">
+                      <div className="bg-muted/30 rounded-md p-3 text-sm break-words">
                         <p className="mb-2">
                           Subject: Your Take on Airbnb&apos;s Product-Led Growth Strategy
                         </p>
@@ -220,7 +222,7 @@ export function HeroDialog() {
                         </p>
                         <p>Would you be open to a 15-minute conversation next week?</p>
                       </div>
-                      <div className="mt-3 flex justify-between">
+                      <div className="mt-3 flex flex-wrap justify-between gap-2">
                         <Button variant="outline" size="sm">
                           Regenerate
                         </Button>
@@ -234,13 +236,13 @@ export function HeroDialog() {
               </div>
             </div>
 
-            <div className="group flex items-start gap-6">
+            <div className="group flex flex-wrap items-start gap-4 sm:flex-nowrap sm:gap-6">
               <div className="bg-primary/10 border-primary/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
                 <span className="text-primary text-lg font-bold">4</span>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-xl font-bold">
+                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-bold">
                     <Zap className="text-primary h-5 w-5" />
                     Smart Follow-up & Analytics
                   </h3>
@@ -252,7 +254,7 @@ export function HeroDialog() {
 
                 <div className="overflow-hidden rounded-lg border shadow-sm">
                   <div className="bg-muted/30 p-4">
-                    <div className="mb-4 grid grid-cols-3 gap-3">
+                    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="bg-background rounded-md p-3 text-center shadow-sm">
                         <div className="text-primary text-3xl font-bold">78%</div>
                         <div className="text-muted-foreground text-xs">Open Rate</div>
@@ -268,7 +270,7 @@ export function HeroDialog() {
                     </div>
 
                     <div className="bg-background mb-2 rounded-md p-3 shadow-sm">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full bg-green-100"></div>
                           <span className="font-medium">Sarah Johnson</span>
@@ -280,7 +282,7 @@ export function HeroDialog() {
                     </div>
 
                     <div className="bg-background rounded-md p-3 shadow-sm">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full bg-blue-100"></div>
                           <span className="font-medium">Michael Chen</span>
