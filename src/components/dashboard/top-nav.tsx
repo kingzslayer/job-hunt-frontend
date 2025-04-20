@@ -14,12 +14,16 @@ import {
 } from '../ui/dropdown-menu';
 import { Input } from '../ui/input';
 
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/utils/supabase/client';
+
 interface TopNavProps extends React.HTMLAttributes<HTMLElement> {
   showSidebarButton?: boolean;
   onSidebarOpen?: () => void;
 }
 
 export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }: TopNavProps) {
+  const router = useRouter();
   // Dummy data
   const user = {
     name: 'John Doe',
@@ -53,6 +57,11 @@ export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }
   ];
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  async function logout() {
+    await supabase().auth.signOut();
+    router.push('/');
+  }
 
   return (
     <div className={cn('bg-card flex h-16 items-center border-b px-4', className)} {...props}>
@@ -165,6 +174,7 @@ export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }
             <DropdownMenuItem asChild>
               <Link
                 href="/"
+                onClick={logout}
                 className="text-destructive focus:text-destructive w-full cursor-pointer"
               >
                 <LogOut className="mr-2 h-4 w-4" />

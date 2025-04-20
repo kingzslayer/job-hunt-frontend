@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { supabase } from '@/utils/supabase/client';
 
 const formSchema = z
   .object({
@@ -38,8 +39,9 @@ const formSchema = z
   });
 
 export function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
-  const [isLoading, setIsLoading] = useState<'email' | 'google' | null>(null);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<'email' | 'google' | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,13 +52,20 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
     mode: 'onSubmit',
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading('email');
-    setTimeout(() => {
-      console.log(values);
-      setIsLoading(null);
-      router.push('/home');
-    }, 2000);
+    await supabase()
+      .auth.signUp({
+        email: values.email,
+        password: values.password,
+      })
+      .then((res) => {
+        if (res.data.session) {
+          router.push('/home');
+        }
+      });
+
+    setIsLoading(null);
   }
 
   function handleGoogleLogin() {

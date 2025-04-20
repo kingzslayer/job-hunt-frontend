@@ -37,7 +37,7 @@ export function SidebarNav({
       {...props}
     >
       {/* Logo section */}
-      <div className="flex h-16 items-center px-4">
+      <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <div className="text-primary">
             <Brain className="h-6 w-6" />
