@@ -8,7 +8,7 @@ export async function authMiddleware(request: NextRequest) {
     request,
   });
 
-  createServerClient(
+  const supabasessr = await createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -30,9 +30,10 @@ export async function authMiddleware(request: NextRequest) {
     },
   );
 
-  const token = request.cookies.get('auth-token');
-  if (pathname.startsWith('/auth/') || pathname === '/') {
-    if (token?.value) {
+  const user = (await supabasessr.auth.getUser()).data.user;
+
+  if (pathname.startsWith('/auth/')) {
+    if (user) {
       return NextResponse.redirect(new URL('/home', request.url));
     }
   }

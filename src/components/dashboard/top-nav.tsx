@@ -59,7 +59,7 @@ export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   async function logout() {
-    await supabase().auth.signOut();
+    await supabase.auth.signOut();
     router.push('/');
   }
 

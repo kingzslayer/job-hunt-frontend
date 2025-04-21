@@ -45,8 +45,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading('email');
-    await supabase()
-      .auth.signInWithPassword({
+    await supabase.auth
+      .signInWithPassword({
         email: values.email,
         password: values.password,
       })

@@ -78,7 +78,6 @@ export default function SettingsPage() {
     { id: 'appearance', label: 'Appearance', icon: <PaintBucket size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
     { id: 'privacy', label: 'Privacy', icon: <Lock size={18} /> },
-    // { id: 'data', label: 'Data & Export', icon: <Database size={18} /> },
   ];
 
   // Function to scroll to section

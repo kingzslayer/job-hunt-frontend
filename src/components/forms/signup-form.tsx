@@ -54,8 +54,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading('email');
-    await supabase()
-      .auth.signUp({
+    await supabase.auth
+      .signUp({
         email: values.email,
         password: values.password,
       })
