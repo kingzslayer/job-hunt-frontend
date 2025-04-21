@@ -32,10 +32,8 @@ export async function authMiddleware(request: NextRequest) {
 
   const user = (await supabasessr.auth.getUser()).data.user;
 
-  if (pathname.startsWith('/auth/')) {
-    if (user) {
-      return NextResponse.redirect(new URL('/home', request.url));
-    }
+  if (pathname.startsWith('/auth/') && user) {
+    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   return NextResponse.next();
