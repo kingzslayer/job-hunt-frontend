@@ -8,7 +8,7 @@ export async function authMiddleware(request: NextRequest) {
     request,
   });
 
-  const supabasessr = await createServerClient(
+  const supabasessr = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {

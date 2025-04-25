@@ -1,0 +1,90 @@
+{
+  "technologySkills": {
+    "Programming Languages": [
+      "JavaScript",
+      "TypeScript",
+      "Python",
+      "Java",
+      "C#",
+      "C++",
+      "Go",
+      "Ruby",
+      "PHP",
+      "Rust"
+    ],
+    "Frontend Technologies": [
+      "React",
+      "Angular",
+      "Vue.js",
+      "Svelte",
+      "Next.js",
+      "Tailwind CSS",
+      "Bootstrap",
+      "HTML5",
+      "CSS3"
+    ],
+    "Backend Technologies": [
+      "Node.js",
+      "Express.js",
+      "Django",
+      "Flask",
+      "Spring Boot",
+      "ASP.NET Core",
+      "Laravel",
+      "FastAPI",
+      "Ruby on Rails"
+    ],
+    "Databases": [
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "SQLite",
+      "Redis",
+      "Oracle",
+      "Microsoft SQL Server",
+      "Cassandra"
+    ],
+    "DevOps & Tools": [
+      "Docker",
+      "Kubernetes",
+      "Git",
+      "GitHub",
+      "GitLab",
+      "CI/CD",
+      "Jenkins",
+      "Terraform",
+      "Ansible"
+    ],
+    "Cloud Platforms": [
+      "AWS",
+      "Azure",
+      "Google Cloud Platform",
+      "Firebase",
+      "Heroku",
+      "Netlify",
+      "Vercel"
+    ],
+    "Mobile Development": ["React Native", "Flutter", "Swift", "Kotlin", "Android SDK", "iOS SDK"],
+    "Data & AI": [
+      "Pandas",
+      "NumPy",
+      "TensorFlow",
+      "PyTorch",
+      "Scikit-learn",
+      "Keras",
+      "OpenCV",
+      "Jupyter Notebook"
+    ],
+    "Other Tools & Technologies": [
+      "Webpack",
+      "Vite",
+      "Babel",
+      "ESLint",
+      "Prettier",
+      "Figma",
+      "Postman",
+      "GraphQL",
+      "REST APIs"
+    ]
+  }
+}
