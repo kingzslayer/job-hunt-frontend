@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Toaster } from '@/components/ui/sonner';
 import { withAuth } from '@/lib/auth';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
@@ -15,6 +16,11 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: 'ApplyBrain AI - AI-Powered Job Search Assistant',
   description: 'AI-powered job search assistant to help you land your dream job faster.',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default async function RootLayout({
@@ -37,6 +43,7 @@ export default async function RootLayout({
             <ThemeToggle />
           </div>
         </ThemeProvider>
+        <Toaster closeButton />
       </body>
     </html>
   );

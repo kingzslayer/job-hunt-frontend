@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -45,6 +46,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading('email');
+
     await supabase.auth
       .signInWithPassword({
         email: values.email,
@@ -53,6 +55,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
       .then((res) => {
         if (res.data.session) {
           router.push('/home');
+        }
+        if (res.error) {
+          toast(res.error.message);
         }
       });
     setIsLoading(null);

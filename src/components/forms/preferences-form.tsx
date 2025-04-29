@@ -1,6 +1,6 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Input } from '../ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -8,45 +8,47 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Upload, X } from 'lucide-react';
-import { formatFileSize } from '@/lib/utils';
+import { cn, formatFileSize } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import techSkills from '@/lib/tech-skils.json';
-
+import { SoftSkills, TechSkills } from '@/lib/skills';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { WorkPreferences } from '@/lib/work-pref';
+import { Label } from '../ui/label';
+import { toast } from 'sonner';
 interface TabItem {
   value: string;
   title?: string;
-  disabled: boolean;
+}
+
+interface ActiveDropdown {
+  techSkills: boolean;
+  softSkills: boolean;
 }
 
 const tabItems: TabItem[] = [
   {
     value: 'personal',
     title: 'Personal',
-    disabled: false,
   },
   {
     value: 'resume',
     title: 'Resume',
-    disabled: false,
   },
   {
     value: 'skills',
     title: 'Skills',
-    disabled: false,
   },
   {
     value: 'job_preferences',
     title: 'Job Preferences',
-    disabled: false,
   },
 ];
 
@@ -59,7 +61,7 @@ const resumeTips = [
 ];
 
 const preferenceSchema = z.object({
-  fullname: z.string().min(6, { message: 'Fullname must be at least 6 characters long.' }),
+  fullname: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
   email: z.string().email({
     message: 'Please enter a valid email address.',
   }),
@@ -71,13 +73,27 @@ const preferenceSchema = z.object({
   course: z.string(),
   university: z.string(),
   graduated_year: z.number(),
+  desired_role: z.string(),
+  desired_location: z.string(),
+  minimum_salary: z.number(),
+  years_of_experience: z.number(),
+  work_preference: z.string(),
+  travel_willingness: z.string(),
 });
 
 export function PreferencesForm() {
+  const [width, setWidth] = useState<number>(200);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [resumeBlob, setResumeBlob] = useState<File>();
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const techInputRef = useRef<HTMLInputElement>(null);
+  const softInputRef = useRef<HTMLInputElement>(null);
+  const [resumeFile, setResumeFile] = useState<File>();
+  const [selectedTechSkills, setSelectedTechSkills] = useState<string[]>([]);
+  const [selectedSoftSkills, setSelectedSoftSkills] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<TabItem | undefined>(tabItems[0]);
+  const [isActiveDD, setActiveDD] = useState<ActiveDropdown>({
+    techSkills: false,
+    softSkills: false,
+  });
 
   const form = useForm<z.infer<typeof preferenceSchema>>({
     resolver: zodResolver(preferenceSchema),
@@ -90,6 +106,12 @@ export function PreferencesForm() {
       course: '',
       university: '',
       graduated_year: 2024,
+      desired_role: '',
+      desired_location: '',
+      minimum_salary: 300000,
+      years_of_experience: 2,
+      work_preference: WorkPreferences[1]?.value,
+      travel_willingness: '',
     },
     mode: 'onSubmit',
   });
@@ -100,7 +122,15 @@ export function PreferencesForm() {
 
       const reader = new FileReader();
       reader.onload = () => {
-        setResumeBlob(file);
+        if (file && file.size > 100 * 1024) {
+          if (file.size > 5000 * 1024) {
+            toast('Maximum file size below 5MB');
+          } else {
+            setResumeFile(file);
+          }
+        } else {
+          toast('Minimum file size upto 100KB');
+        }
       };
       if (file) {
         reader.readAsArrayBuffer(file);
@@ -108,36 +138,46 @@ export function PreferencesForm() {
     }
   };
 
-  const toggleSkill = (skill: string) => {
-    setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
-    );
+  const toggleSkill = (skill: string, toggleFor: 'tech_skill' | 'soft_skill') => {
+    if (toggleFor === 'tech_skill')
+      setSelectedTechSkills((prev) =>
+        prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
+      );
+    else {
+      setSelectedSoftSkills((prev) =>
+        prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
+      );
+    }
   };
+
+  useEffect(() => {
+    if (isActiveDD.techSkills && techInputRef.current) {
+      techInputRef.current.focus();
+      setWidth(techInputRef.current.offsetWidth);
+    }
+  }, [isActiveDD]);
 
   return (
     <Tabs defaultValue="personal" className="w-full" value={activeTab?.value}>
-      <TabsList className="grid h-full w-full grid-cols-1 justify-between sm:grid-cols-4">
-        {tabItems.map((tab, i) => (
-          <TabsTrigger
-            key={`tab-item-${i}`}
-            value={tab.value}
-            disabled={tab.disabled}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab.title}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="flex flex-row justify-center gap-2 py-2">
+        {activeTab &&
+          tabItems.map((tab, i) => (
+            <div
+              key={`tab-item-${i}`}
+              className={cn(
+                tab.value === activeTab?.value ? 'bg-primary' : 'bg-muted',
+                'h-1 w-20 rounded-full transition-all ease-in-out',
+              )}
+            />
+          ))}
+      </div>
       <Form {...form}>
         <form className="flex flex-col">
-          <TabsContent value="personal" className="flex flex-col gap-3">
+          <TabsContent value="personal" className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Personal information</div>
-              <div className="text-left text-sm">
-                Update your personal details used for job applications.
-              </div>
             </div>
-            <div className="flex w-full flex-col items-center gap-2 md:gap-4">
+            <div className="flex w-full flex-col items-center gap-2 md:gap-3">
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
@@ -257,8 +297,9 @@ export function PreferencesForm() {
             </div>
             <div className="flex items-center justify-end">
               <Button
-                onClick={() => setActiveTab({ value: 'resume', disabled: true })}
+                variant="secondary"
                 type="button"
+                onClick={() => setActiveTab({ value: 'resume' })}
               >
                 Next
               </Button>
@@ -267,9 +308,6 @@ export function PreferencesForm() {
           <TabsContent value="resume" className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Resume</div>
-              <div className="text-left text-sm">
-                Upload or update your resume for job applications.
-              </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-dashed px-3 py-5">
               <div className="flex flex-col items-center justify-center gap-2">
@@ -289,9 +327,9 @@ export function PreferencesForm() {
                   accept=".pdf,.doc,.docx"
                   onChange={readFile}
                 />
-                {resumeBlob && (
+                {resumeFile && (
                   <span className="text-md font-bold">
-                    {resumeBlob.name} ({formatFileSize(resumeBlob.size)})
+                    {resumeFile.name} ({formatFileSize(resumeFile.size)})
                   </span>
                 )}
                 <Button
@@ -314,14 +352,16 @@ export function PreferencesForm() {
             </div>
             <div className="flex items-center justify-between">
               <Button
-                onClick={() => setActiveTab({ value: 'personal', disabled: true })}
+                variant="secondary"
                 type="button"
+                onClick={() => setActiveTab({ value: 'personal' })}
               >
                 Previous
               </Button>
               <Button
-                onClick={() => setActiveTab({ value: 'skills', disabled: true })}
+                variant="secondary"
                 type="button"
+                onClick={() => setActiveTab({ value: 'skills' })}
               >
                 Next
               </Button>
@@ -330,13 +370,11 @@ export function PreferencesForm() {
           <TabsContent value="skills" className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Skills</div>
-              <div className="text-left text-sm">
-                List your technical, soft skills, and languages.
-              </div>
             </div>
-            <div className="flex flex-col gap-2 overflow-hidden">
+            <div className="flex flex-col gap-1 overflow-hidden">
+              <Label>Technology Skills</Label>
               <div className="flex w-full flex-row flex-wrap gap-2 text-xs">
-                {selectedSkills
+                {selectedTechSkills
                   .sort((a, b) => a.localeCompare(b))
                   .map((skill) => (
                     <div
@@ -348,31 +386,92 @@ export function PreferencesForm() {
                       <X
                         className="hover:text-destructive size-4"
                         onClick={() =>
-                          setSelectedSkills([...selectedSkills.filter((fn) => fn !== skill)])
+                          setSelectedTechSkills([
+                            ...selectedTechSkills.filter((fn) => fn !== skill),
+                          ])
                         }
                       />
                     </div>
                   ))}
               </div>
-              <DropdownMenu>
+              <DropdownMenu
+                open={isActiveDD.techSkills}
+                onOpenChange={(open) => setActiveDD({ techSkills: open, softSkills: false })}
+              >
                 <DropdownMenuTrigger className="flex">
-                  <Input placeholder="Add skill..." />
+                  <Input
+                    ref={techInputRef}
+                    id="skills-input"
+                    placeholder="Add Tech skills..."
+                    onFocus={() => setActiveDD({ techSkills: true, softSkills: false })}
+                  />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-80 min-w-sm">
-                  <p className="text-secondary-foreground/45 text-xs">
-                    Note : You can also select multiple skills.
-                  </p>
-                  {Object.entries(techSkills.technologySkills).map(([category, skills]) => (
+                <DropdownMenuContent style={{ width: width }} className="max-h-80 min-w-sm">
+                  {Object.entries(TechSkills.technologySkills).map(([category, skills]) => (
                     <DropdownMenuGroup key={`tech-skill-group-${category}`}>
-                      <DropdownMenuLabel>{category}</DropdownMenuLabel>
                       {skills.map((skill) => (
                         <DropdownMenuCheckboxItem
                           onSelect={(e) => {
                             e.preventDefault(); // Prevent closing
                           }}
                           key={`tech-skill-${skill}`}
-                          checked={selectedSkills.includes(skill)}
-                          onCheckedChange={() => toggleSkill(skill)}
+                          checked={selectedTechSkills.includes(skill)}
+                          onCheckedChange={() => toggleSkill(skill, 'tech_skill')}
+                        >
+                          {skill}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuGroup>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex flex-col gap-1 overflow-hidden">
+              <Label>Soft Skills</Label>
+              <div className="flex w-full flex-row flex-wrap gap-2 text-xs">
+                {selectedSoftSkills
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((skill) => (
+                    <div
+                      key={skill}
+                      title={skill}
+                      className="bg-primary/15 flex cursor-pointer gap-2 rounded-full p-2 px-3 whitespace-nowrap"
+                    >
+                      {skill}
+                      <X
+                        className="hover:text-destructive size-4"
+                        onClick={() =>
+                          setSelectedSoftSkills([
+                            ...selectedSoftSkills.filter((fn) => fn !== skill),
+                          ])
+                        }
+                      />
+                    </div>
+                  ))}
+              </div>
+              <DropdownMenu
+                open={isActiveDD.softSkills}
+                onOpenChange={(open) => setActiveDD({ techSkills: false, softSkills: open })}
+              >
+                <DropdownMenuTrigger className="flex w-full">
+                  <Input
+                    ref={softInputRef}
+                    id="skills-input"
+                    placeholder="Add Soft skills..."
+                    onFocus={() => setActiveDD({ techSkills: false, softSkills: true })}
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent style={{ width: width }} className="max-h-80 w-full">
+                  {Object.entries(SoftSkills.softSkills).map(([category, skills]) => (
+                    <DropdownMenuGroup key={`soft-skill-group-${category}`}>
+                      {skills.map((skill) => (
+                        <DropdownMenuCheckboxItem
+                          onSelect={(e) => {
+                            e.preventDefault(); // Prevent closing
+                          }}
+                          key={`soft-skill-${skill}`}
+                          checked={selectedSoftSkills.includes(skill)}
+                          onCheckedChange={() => toggleSkill(skill, 'soft_skill')}
                         >
                           {skill}
                         </DropdownMenuCheckboxItem>
@@ -384,23 +483,131 @@ export function PreferencesForm() {
             </div>
             <div className="flex items-center justify-between">
               <Button
-                onClick={() => setActiveTab({ value: 'resume', disabled: true })}
+                variant="secondary"
                 type="button"
+                onClick={() => setActiveTab({ value: 'resume' })}
               >
                 Previous
               </Button>
               <Button
-                onClick={() => setActiveTab({ value: 'job_preferences', disabled: true })}
+                variant="secondary"
                 type="button"
+                onClick={() => setActiveTab({ value: 'job_preferences' })}
               >
                 Next
               </Button>
             </div>
           </TabsContent>
-          <TabsContent value="job_preferences" className="flex flex-col gap-3">
+          <TabsContent value="job_preferences" className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Job Preferences</div>
-              <div className="text-left text-sm">Set your job preferences to improve matching.</div>
+            </div>
+            <div className="flex w-full flex-col items-center gap-2 md:gap-3">
+              <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
+                <FormField
+                  control={form.control}
+                  name="desired_role"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="desired_role">Desired Role</FormLabel>
+                      <FormControl>
+                        <Input id="desired_role" placeholder="Human Resource" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="desired_location"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="desired_location">Desired Location</FormLabel>
+                      <FormControl>
+                        <Input id="desired_location" placeholder="San Francisco, CA" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
+                <FormField
+                  control={form.control}
+                  name="minimum_salary"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="minimum_salary">Minimum Salary (Rupees) </FormLabel>
+                      <FormControl>
+                        <Input id="minimum_salary" placeholder="300000" type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="years_of_experience"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="years_of_experience">Years of Experience</FormLabel>
+                      <FormControl>
+                        <Input id="years_of_experience" placeholder="2" type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
+                <FormField
+                  control={form.control}
+                  name="work_preference"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="work_preference">Work Preference</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl className="w-full">
+                          <SelectTrigger className="shadow">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {WorkPreferences.map((pref, i) => (
+                            <SelectItem key={`work-preference-${i}`} value={pref.value}>
+                              {pref.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="travel_willingness"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="travel_willingness">Travel Willingness</FormLabel>
+                      <FormControl>
+                        <Input id="travel_willingness" placeholder="Up to 25%" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setActiveTab({ value: 'skills' })}
+              >
+                Previous
+              </Button>
+              <Button type="button">Submit</Button>
             </div>
           </TabsContent>
         </form>

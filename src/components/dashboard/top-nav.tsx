@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Bell, Check, HelpCircle, LogOut, Menu, Search, Settings, User } from 'lucide-react';
+import { HelpCircle, LogOut, Menu, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -32,32 +32,6 @@ export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }
     initials: 'JD',
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'New application status',
-      description: 'Your application to Google has been viewed',
-      time: '5 minutes ago',
-      read: false,
-    },
-    {
-      id: 2,
-      title: 'Interview scheduled',
-      description: 'Microsoft wants to interview you next week',
-      time: '2 hours ago',
-      read: false,
-    },
-    {
-      id: 3,
-      title: 'Application deadline',
-      description: 'Amazon application closes tomorrow',
-      time: '1 day ago',
-      read: true,
-    },
-  ];
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
   async function logout() {
     await supabase.auth.signOut();
     router.push('/');
@@ -72,67 +46,11 @@ export function TopNav({ className, showSidebarButton, onSidebarOpen, ...props }
           <span className="sr-only">Open sidebar</span>
         </Button>
       )}
-
       <div className="ml-auto flex items-center gap-4">
         <div className="relative hidden items-center md:flex">
           <Search className="text-muted-foreground absolute left-2.5 h-4 w-4" />
           <Input type="search" placeholder="Search jobs, companies..." className="w-[250px] pl-9" />
         </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-              {unreadCount > 0 && (
-                <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs">
-                  {unreadCount}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              <span>Notifications</span>
-              {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" className="h-auto p-0 text-xs">
-                  <Check className="mr-1 h-3 w-3" />
-                  Mark all as read
-                </Button>
-              )}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {notifications.length > 0 ? (
-              <>
-                {notifications.map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className={cn(
-                      'flex cursor-pointer flex-col items-start p-3',
-                      !notification.read && 'bg-muted/50',
-                    )}
-                  >
-                    <div className="font-medium">{notification.title}</div>
-                    <div className="text-muted-foreground text-sm">{notification.description}</div>
-                    <div className="text-muted-foreground mt-1 text-xs">{notification.time}</div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/notifications"
-                    className="hover:bg-muted w-full cursor-pointer text-center"
-                  >
-                    View all notifications
-                  </Link>
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <div className="text-muted-foreground py-4 text-center">No notifications</div>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer">
