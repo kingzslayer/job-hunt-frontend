@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { authMiddleware } from './middleware/auth-middleware';
 
 export function middleware(request: NextRequest) {
@@ -6,5 +6,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/auth/:path', '/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

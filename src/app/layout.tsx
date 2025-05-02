@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Toaster } from '@/components/ui/sonner';
 import { withAuth } from '@/lib/auth';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
@@ -37,6 +38,7 @@ export default async function RootLayout({
             <ThemeToggle />
           </div>
         </ThemeProvider>
+        <Toaster closeButton />
       </body>
     </html>
   );

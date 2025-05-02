@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { useEffect, useState } from 'react';
 
 // Icons for the settings menu
-import { Bell, Database, Lock, PaintBucket, UserCircle } from 'lucide-react';
+import { Bell, Lock, PaintBucket, Settings2, UserCircle } from 'lucide-react';
+import { PreferencesForm } from '@/components/forms/preferences-form';
 
 export default function SettingsPage() {
   // State to track active section
@@ -70,18 +71,15 @@ export default function SettingsPage() {
       activityTracking: true,
       dataSharing: false,
     },
-    export: {
-      lastExport: 'Never',
-    },
   };
 
   // Menu items definition with icons
   const menuItems = [
     { id: 'account', label: 'Account', icon: <UserCircle size={18} /> },
     { id: 'appearance', label: 'Appearance', icon: <PaintBucket size={18} /> },
+    { id: 'preferences', label: 'Preferences', icon: <Settings2 size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
     { id: 'privacy', label: 'Privacy', icon: <Lock size={18} /> },
-    { id: 'data', label: 'Data & Export', icon: <Database size={18} /> },
   ];
 
   // Function to scroll to section
@@ -233,6 +231,15 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          <Card id="preferences">
+            <CardHeader>
+              <CardTitle>Preferences</CardTitle>
+              <CardDescription>Set your preferences for the application</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <PreferencesForm />
+            </CardContent>
+          </Card>
           <Card id="notifications">
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>
@@ -360,35 +367,6 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch checked={settings.privacy.dataSharing} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card id="data">
-            <CardHeader>
-              <CardTitle>Data & Export</CardTitle>
-              <CardDescription>Manage your data and export options</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Export Your Data</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Download all your data in a portable format
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Last export: {settings.export.lastExport}
-                  </p>
-                </div>
-                <Button variant="outline">Export Data</Button>
-              </div>
-              <Separator />
-              <div>
-                <h3 className="mb-2 font-medium">Clear Application Data</h3>
-                <p className="text-muted-foreground mb-4 text-sm">
-                  Clear cache and local storage data (will not delete your account)
-                </p>
-                <Button variant="outline">Clear Data</Button>
               </div>
             </CardContent>
           </Card>

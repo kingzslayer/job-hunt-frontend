@@ -18,6 +18,13 @@ First, clone the repository and install dependencies:
 npm install
 ```
 
+## Supabase configuration
+
+- Create an `.env` file in project folder
+- Copy and paste the below code env file, replace with your supabase url & key
+- `NEXT_PUBLIC_SUPABASE_URL= https://your-project-id.supabase.co`
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY= your_anon_key`
+
 Then, run the development server:
 
 ```bash
