@@ -6,7 +6,7 @@ export async function checkAuthStatus() {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token')?.value;
 
-    return token ? true : false;
+    return token;
   } catch {
     return false;
   }

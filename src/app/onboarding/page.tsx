@@ -1,6 +1,8 @@
 import { PreferencesForm } from '@/components/forms/preferences-form';
+import { withAuth } from '@/lib/auth';
 
-export default function JobPreferences() {
+export default async function JobPreferences() {
+  await withAuth('/onboarding');
   return (
     <div className="bg-background flex min-h-svh flex-col items-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-xl flex-col items-center gap-2">

@@ -62,6 +62,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
       .then((res) => {
         if (res.data.session) {
           router.push('/home');
+          document.cookie = 'onbording_completed=false; path=/';
         }
       });
 

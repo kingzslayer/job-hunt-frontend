@@ -10,7 +10,6 @@ export const SoftSkills = {
     ],
     TeamworkCollaboration: [
       'Team Player',
-      'Empathy',
       'Conflict Resolution',
       'Interpersonal Skills',
       'Cross-functional Collaboration',

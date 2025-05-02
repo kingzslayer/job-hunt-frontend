@@ -16,11 +16,6 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: 'ApplyBrain AI - AI-Powered Job Search Assistant',
   description: 'AI-powered job search assistant to help you land your dream job faster.',
-  icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
-  },
 };
 
 export default async function RootLayout({

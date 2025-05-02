@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { useEffect, useState } from 'react';
 
 // Icons for the settings menu
-import { Bell, Lock, PaintBucket, UserCircle } from 'lucide-react';
+import { Bell, Lock, PaintBucket, Settings2, UserCircle } from 'lucide-react';
+import { PreferencesForm } from '@/components/forms/preferences-form';
 
 export default function SettingsPage() {
   // State to track active section
@@ -76,6 +77,7 @@ export default function SettingsPage() {
   const menuItems = [
     { id: 'account', label: 'Account', icon: <UserCircle size={18} /> },
     { id: 'appearance', label: 'Appearance', icon: <PaintBucket size={18} /> },
+    { id: 'preferences', label: 'Preferences', icon: <Settings2 size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
     { id: 'privacy', label: 'Privacy', icon: <Lock size={18} /> },
   ];
@@ -229,6 +231,15 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          <Card id="preferences">
+            <CardHeader>
+              <CardTitle>Preferences</CardTitle>
+              <CardDescription>Set your preferences for the application</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <PreferencesForm />
+            </CardContent>
+          </Card>
           <Card id="notifications">
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>

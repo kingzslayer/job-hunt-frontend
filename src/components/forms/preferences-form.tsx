@@ -8,49 +8,40 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import { useEffect, useRef, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Upload } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+
 import { SoftSkills, TechSkills } from '@/lib/skills';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { WorkPreferences } from '@/lib/work-pref';
 import { Label } from '../ui/label';
 import { toast } from 'sonner';
-interface TabItem {
-  value: string;
-  title?: string;
-}
+import { MultiSelectDropdown } from '../common/dropdown';
+import { useRouter } from 'next/navigation';
 
-interface ActiveDropdown {
-  techSkills: boolean;
-  softSkills: boolean;
-}
+const tabs = ['personal', 'resume', 'skills', 'job_preferences'];
 
-const tabItems: TabItem[] = [
-  {
-    value: 'personal',
-    title: 'Personal',
-  },
-  {
-    value: 'resume',
-    title: 'Resume',
-  },
-  {
-    value: 'skills',
-    title: 'Skills',
-  },
-  {
-    value: 'job_preferences',
-    title: 'Job Preferences',
-  },
-];
+const fieldTapsMap: Record<string, string> = {
+  first_name: 'personal',
+  last_name: 'personal',
+  email: 'personal',
+  phone: 'personal',
+  address: 'personal',
+  degree: 'personal',
+  course: 'personal',
+  university: 'personal',
+  graduated_year: 'personal',
+  resume: 'resume',
+  tech_skills: 'skills',
+  soft_skills: 'skills',
+  desired_role: 'job_preferences',
+  desired_location: 'job_preferences',
+  minimum_salary: 'job_preferences',
+  years_of_experience: 'job_preferences',
+  work_preference: 'job_preferences',
+  travel_willingness: 'job_preferences',
+};
 
 const resumeTips = [
   'Keep your resume to 1-2 pages for best results',
@@ -61,44 +52,40 @@ const resumeTips = [
 ];
 
 const preferenceSchema = z.object({
-  fullname: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
+  first_name: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
+  last_name: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
   email: z.string().email({
     message: 'Please enter a valid email address.',
   }),
   phone: z.number({
     message: 'Please enter a valid phone number.',
   }),
-  address: z.string(),
-  degree: z.string(),
-  course: z.string(),
-  university: z.string(),
-  graduated_year: z.number(),
-  desired_role: z.string(),
-  desired_location: z.string(),
-  minimum_salary: z.number(),
-  years_of_experience: z.number(),
-  work_preference: z.string(),
+  address: z.string().nonempty({ message: 'Address field is required.' }),
+  degree: z.string().nonempty({ message: 'Degree field is required.' }),
+  course: z.string().nonempty({ message: 'Course field is required.' }),
+  university: z.string().nonempty({ message: 'Specify your college/school name' }),
+  graduated_year: z.coerce.number(),
+  desired_role: z.string().nonempty({ message: 'Desired role field is required.' }),
+  desired_location: z.string().nonempty({ message: 'Specify your desired location.' }),
+  minimum_salary: z.coerce.number(),
+  years_of_experience: z.coerce.number({ message: 'Enter your years of work experience' }),
+  work_preference: z.string().nonempty({ message: 'Work preference field is required.' }),
   travel_willingness: z.string(),
 });
 
 export function PreferencesForm() {
-  const [width, setWidth] = useState<number>(200);
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const techInputRef = useRef<HTMLInputElement>(null);
-  const softInputRef = useRef<HTMLInputElement>(null);
   const [resumeFile, setResumeFile] = useState<File>();
+  const [activeTab, setActiveTab] = useState(String(tabs[0]));
   const [selectedTechSkills, setSelectedTechSkills] = useState<string[]>([]);
   const [selectedSoftSkills, setSelectedSoftSkills] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<TabItem | undefined>(tabItems[0]);
-  const [isActiveDD, setActiveDD] = useState<ActiveDropdown>({
-    techSkills: false,
-    softSkills: false,
-  });
 
   const form = useForm<z.infer<typeof preferenceSchema>>({
     resolver: zodResolver(preferenceSchema),
     defaultValues: {
-      fullname: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: 123456780,
       address: '',
@@ -110,7 +97,7 @@ export function PreferencesForm() {
       desired_location: '',
       minimum_salary: 300000,
       years_of_experience: 2,
-      work_preference: WorkPreferences[1]?.value,
+      work_preference: WorkPreferences[0]?.value,
       travel_willingness: '',
     },
     mode: 'onSubmit',
@@ -124,12 +111,12 @@ export function PreferencesForm() {
       reader.onload = () => {
         if (file && file.size > 100 * 1024) {
           if (file.size > 5000 * 1024) {
-            toast('Maximum file size below 5MB');
+            toast('Maximum file size is below 5MB');
           } else {
             setResumeFile(file);
           }
         } else {
-          toast('Minimum file size upto 100KB');
+          toast('Minimum file size is upto 100KB');
         }
       };
       if (file) {
@@ -138,42 +125,84 @@ export function PreferencesForm() {
     }
   };
 
-  const toggleSkill = (skill: string, toggleFor: 'tech_skill' | 'soft_skill') => {
-    if (toggleFor === 'tech_skill')
-      setSelectedTechSkills((prev) =>
-        prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
-      );
-    else {
-      setSelectedSoftSkills((prev) =>
-        prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
-      );
+  async function onSubmit(values: z.infer<typeof preferenceSchema>) {
+    const data = {
+      ...values,
+      tech_skills: selectedTechSkills,
+      soft_skills: selectedSoftSkills,
+    };
+
+    console.log('Form Data:', data);
+    document.cookie = 'onbording_completed=true; path=/';
+    toast.success('Preferences saved successfully!');
+    router.push('/home');
+  }
+
+  const fieldTab = Object.keys(form.formState.errors).map((key) => fieldTapsMap[key]);
+
+  const onNextTab = async () => {
+    const index = tabs.indexOf(activeTab);
+
+    if (!form.formState.isSubmitted) {
+      form.handleSubmit(onSubmit)();
     }
+
+    switch (form.formState.isSubmitted) {
+      case fieldTab.includes(tabs[0]): {
+        return setActiveTab(String(tabs[0]));
+      }
+      case resumeFile === undefined: {
+        return setActiveTab(String(tabs[1]));
+      }
+      case selectedSoftSkills.length === 0 || selectedTechSkills.length === 0: {
+        return setActiveTab(String(tabs[2]));
+      }
+      case fieldTab.includes(tabs[3]): {
+        return setActiveTab(String(tabs[3]));
+      }
+    }
+
+    if (form.formState.isSubmitted) return setActiveTab(String(tabs[index + 1]));
   };
 
-  useEffect(() => {
-    if (isActiveDD.techSkills && techInputRef.current) {
-      techInputRef.current.focus();
-      setWidth(techInputRef.current.offsetWidth);
+  function disableOnNextTab(): boolean {
+    switch (activeTab) {
+      case tabs[0]: {
+        return fieldTab.includes(activeTab);
+      }
+      case tabs[1]: {
+        return resumeFile === undefined;
+      }
+      case tabs[2]: {
+        return selectedSoftSkills.length === 0 || selectedTechSkills.length === 0;
+      }
+      default:
+        return false;
     }
-  }, [isActiveDD]);
+  }
+
+  const onPrevTab = async () => {
+    const index = tabs.indexOf(activeTab);
+    setActiveTab(String(tabs[index - 1]));
+  };
 
   return (
-    <Tabs defaultValue="personal" className="w-full" value={activeTab?.value}>
+    <Tabs defaultValue={tabs[0]} className="w-full" value={activeTab}>
       <div className="flex flex-row justify-center gap-2 py-2">
         {activeTab &&
-          tabItems.map((tab, i) => (
+          tabs.map((tab, i) => (
             <div
               key={`tab-item-${i}`}
               className={cn(
-                tab.value === activeTab?.value ? 'bg-primary' : 'bg-muted',
+                tab === activeTab ? 'bg-primary' : 'bg-muted',
                 'h-1 w-20 rounded-full transition-all ease-in-out',
               )}
             />
           ))}
       </div>
       <Form {...form}>
-        <form className="flex flex-col">
-          <TabsContent value="personal" className="flex flex-col gap-2">
+        <form className="flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
+          <TabsContent value={String(tabs[0])} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Personal information</div>
             </div>
@@ -181,17 +210,32 @@ export function PreferencesForm() {
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
-                  name="fullname"
+                  name="first_name"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel htmlFor="fullname">Full Name</FormLabel>
+                      <FormLabel htmlFor="first_name">First Name</FormLabel>
                       <FormControl>
-                        <Input id="fullname" placeholder="john doe" {...field} />
+                        <Input id="first_name" placeholder="John " {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="last_name">Last Name</FormLabel>
+                      <FormControl>
+                        <Input id="last_name" placeholder="Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
                   name="email"
@@ -205,20 +249,20 @@ export function PreferencesForm() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="phone">Phone</FormLabel>
+                      <FormControl>
+                        <Input id="phone" placeholder="+91 1234567890" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel htmlFor="phone">Phone</FormLabel>
-                    <FormControl>
-                      <Input id="phone" placeholder="+91 1234567890" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="address"
@@ -295,17 +339,8 @@ export function PreferencesForm() {
                 )}
               />
             </div>
-            <div className="flex items-center justify-end">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'resume' })}
-              >
-                Next
-              </Button>
-            </div>
           </TabsContent>
-          <TabsContent value="resume" className="flex flex-col gap-3">
+          <TabsContent value={String(tabs[1])} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Resume</div>
             </div>
@@ -332,11 +367,7 @@ export function PreferencesForm() {
                     {resumeFile.name} ({formatFileSize(resumeFile.size)})
                   </span>
                 )}
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  type="button"
-                  variant="secondary"
-                >
+                <Button type="button" onClick={() => fileInputRef.current?.click()}>
                   Browse file
                 </Button>
               </div>
@@ -350,155 +381,37 @@ export function PreferencesForm() {
                 </ul>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'personal' })}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'skills' })}
-              >
-                Next
-              </Button>
-            </div>
           </TabsContent>
-          <TabsContent value="skills" className="flex flex-col gap-3">
+          <TabsContent value={String(tabs[2])} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Skills</div>
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <Label>Technology Skills</Label>
-              <div className="flex w-full flex-row flex-wrap gap-2 text-xs">
-                {selectedTechSkills
-                  .sort((a, b) => a.localeCompare(b))
-                  .map((skill) => (
-                    <div
-                      key={skill}
-                      title={skill}
-                      className="bg-primary/15 flex cursor-pointer gap-2 rounded-full p-2 px-3 whitespace-nowrap"
-                    >
-                      {skill}
-                      <X
-                        className="hover:text-destructive size-4"
-                        onClick={() =>
-                          setSelectedTechSkills([
-                            ...selectedTechSkills.filter((fn) => fn !== skill),
-                          ])
-                        }
-                      />
-                    </div>
-                  ))}
-              </div>
-              <DropdownMenu
-                open={isActiveDD.techSkills}
-                onOpenChange={(open) => setActiveDD({ techSkills: open, softSkills: false })}
-              >
-                <DropdownMenuTrigger className="flex">
-                  <Input
-                    ref={techInputRef}
-                    id="skills-input"
-                    placeholder="Add Tech skills..."
-                    onFocus={() => setActiveDD({ techSkills: true, softSkills: false })}
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent style={{ width: width }} className="max-h-80 min-w-sm">
-                  {Object.entries(TechSkills.technologySkills).map(([category, skills]) => (
-                    <DropdownMenuGroup key={`tech-skill-group-${category}`}>
-                      {skills.map((skill) => (
-                        <DropdownMenuCheckboxItem
-                          onSelect={(e) => {
-                            e.preventDefault(); // Prevent closing
-                          }}
-                          key={`tech-skill-${skill}`}
-                          checked={selectedTechSkills.includes(skill)}
-                          onCheckedChange={() => toggleSkill(skill, 'tech_skill')}
-                        >
-                          {skill}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuGroup>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <MultiSelectDropdown
+                placeholder="Add skills..."
+                selected={selectedTechSkills}
+                setSelected={setSelectedTechSkills}
+                items={Object.values(TechSkills.technologySkills).flat()}
+              />
+              {selectedTechSkills.length === 0 && (
+                <p className="text-destructive text-sm">Specify atlest one Skill.</p>
+              )}
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <Label>Soft Skills</Label>
-              <div className="flex w-full flex-row flex-wrap gap-2 text-xs">
-                {selectedSoftSkills
-                  .sort((a, b) => a.localeCompare(b))
-                  .map((skill) => (
-                    <div
-                      key={skill}
-                      title={skill}
-                      className="bg-primary/15 flex cursor-pointer gap-2 rounded-full p-2 px-3 whitespace-nowrap"
-                    >
-                      {skill}
-                      <X
-                        className="hover:text-destructive size-4"
-                        onClick={() =>
-                          setSelectedSoftSkills([
-                            ...selectedSoftSkills.filter((fn) => fn !== skill),
-                          ])
-                        }
-                      />
-                    </div>
-                  ))}
-              </div>
-              <DropdownMenu
-                open={isActiveDD.softSkills}
-                onOpenChange={(open) => setActiveDD({ techSkills: false, softSkills: open })}
-              >
-                <DropdownMenuTrigger className="flex w-full">
-                  <Input
-                    ref={softInputRef}
-                    id="skills-input"
-                    placeholder="Add Soft skills..."
-                    onFocus={() => setActiveDD({ techSkills: false, softSkills: true })}
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent style={{ width: width }} className="max-h-80 w-full">
-                  {Object.entries(SoftSkills.softSkills).map(([category, skills]) => (
-                    <DropdownMenuGroup key={`soft-skill-group-${category}`}>
-                      {skills.map((skill) => (
-                        <DropdownMenuCheckboxItem
-                          onSelect={(e) => {
-                            e.preventDefault(); // Prevent closing
-                          }}
-                          key={`soft-skill-${skill}`}
-                          checked={selectedSoftSkills.includes(skill)}
-                          onCheckedChange={() => toggleSkill(skill, 'soft_skill')}
-                        >
-                          {skill}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuGroup>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'resume' })}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'job_preferences' })}
-              >
-                Next
-              </Button>
+              <MultiSelectDropdown
+                placeholder="Add skills..."
+                selected={selectedSoftSkills}
+                setSelected={setSelectedSoftSkills}
+                items={Object.values(SoftSkills.softSkills).flat()}
+              />
+              {selectedSoftSkills.length === 0 && (
+                <p className="text-destructive text-sm">Specify atlest one Skill.</p>
+              )}
             </div>
           </TabsContent>
-          <TabsContent value="job_preferences" className="flex flex-col gap-2">
+          <TabsContent value={String(tabs[3])} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <div className="text-md font-bold">Job Preferences</div>
             </div>
@@ -599,17 +512,37 @@ export function PreferencesForm() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveTab({ value: 'skills' })}
-              >
-                Previous
-              </Button>
-              <Button type="button">Submit</Button>
-            </div>
           </TabsContent>
+          <div
+            className={cn(
+              activeTab === tabs[0] ? 'justify-end' : 'justify-between',
+              'flex items-center pt-3',
+            )}
+          >
+            <Button
+              hidden={tabs[0] === activeTab}
+              variant="secondary"
+              type="button"
+              onClick={onPrevTab}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              hidden={activeTab === tabs[tabs.length - 1]}
+              disabled={disableOnNextTab()}
+              onClick={onNextTab}
+            >
+              Next
+            </Button>
+            <Button
+              disabled={Object.keys(form.formState.errors).length !== 0}
+              hidden={activeTab !== tabs[tabs.length - 1]}
+            >
+              Save
+            </Button>
+          </div>
         </form>
       </Form>
     </Tabs>
