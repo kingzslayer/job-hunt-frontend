@@ -100,7 +100,8 @@ export function PreferencesForm() {
       work_preference: WorkPreferences[0]?.value,
       travel_willingness: '',
     },
-    mode: 'onSubmit',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
   const readFile = () => {
@@ -144,7 +145,7 @@ export function PreferencesForm() {
     const index = tabs.indexOf(activeTab);
 
     if (!form.formState.isSubmitted) {
-      form.handleSubmit(onSubmit)();
+      await form.handleSubmit(onSubmit)();
     }
 
     switch (form.formState.isSubmitted) {
