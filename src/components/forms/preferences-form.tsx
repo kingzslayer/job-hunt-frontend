@@ -396,7 +396,7 @@ export function PreferencesForm() {
                 items={Object.values(TechSkills.technologySkills).flat()}
               />
               {selectedTechSkills.length === 0 && (
-                <p className="text-destructive text-sm">Specify atlest one Skill.</p>
+                <p className="text-destructive text-sm">Specify atleast one Skill.</p>
               )}
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
@@ -408,7 +408,7 @@ export function PreferencesForm() {
                 items={Object.values(SoftSkills.softSkills).flat()}
               />
               {selectedSoftSkills.length === 0 && (
-                <p className="text-destructive text-sm">Specify atlest one Skill.</p>
+                <p className="text-destructive text-sm">Specify atleast one Skill.</p>
               )}
             </div>
           </TabsContent>
