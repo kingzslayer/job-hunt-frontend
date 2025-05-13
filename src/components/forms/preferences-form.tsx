@@ -13,35 +13,13 @@ import { Upload } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
 
 import { SoftSkills, TechSkills } from '@/lib/skills';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { WorkPreferences } from '@/lib/work-pref';
-import { Label } from '../ui/label';
 import { toast } from 'sonner';
 import { MultiSelectDropdown } from '../common/dropdown';
 import { useRouter } from 'next/navigation';
+import { preferencesSchema, type PreferencesSchemaType } from '@/lib/validation';
+import { employeeJobTypes, jobExperienceLevels, workLocationTypes } from '@/lib/work-pref';
 
 const tabs = ['personal', 'resume', 'skills', 'job_preferences'];
-
-const fieldTapsMap: Record<string, string> = {
-  first_name: 'personal',
-  last_name: 'personal',
-  email: 'personal',
-  phone: 'personal',
-  address: 'personal',
-  degree: 'personal',
-  course: 'personal',
-  university: 'personal',
-  graduated_year: 'personal',
-  resume: 'resume',
-  tech_skills: 'skills',
-  soft_skills: 'skills',
-  desired_role: 'job_preferences',
-  desired_location: 'job_preferences',
-  minimum_salary: 'job_preferences',
-  years_of_experience: 'job_preferences',
-  work_preference: 'job_preferences',
-  travel_willingness: 'job_preferences',
-};
 
 const resumeTips = [
   'Keep your resume to 1-2 pages for best results',
@@ -51,54 +29,41 @@ const resumeTips = [
   'Our AI will tailor your resume for each job application',
 ];
 
-const preferenceSchema = z.object({
-  first_name: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
-  last_name: z.string().min(6, { message: 'Full name must be at least 6 characters long.' }),
-  email: z.string().email({
-    message: 'Please enter a valid email address.',
-  }),
-  phone: z.number({
-    message: 'Please enter a valid phone number.',
-  }),
-  address: z.string().nonempty({ message: 'Address field is required.' }),
-  degree: z.string().nonempty({ message: 'Degree field is required.' }),
-  course: z.string().nonempty({ message: 'Course field is required.' }),
-  university: z.string().nonempty({ message: 'Specify your college/school name' }),
-  graduated_year: z.coerce.number(),
-  desired_role: z.string().nonempty({ message: 'Desired role field is required.' }),
-  desired_location: z.string().nonempty({ message: 'Specify your desired location.' }),
-  minimum_salary: z.coerce.number(),
-  years_of_experience: z.coerce.number({ message: 'Enter your years of work experience' }),
-  work_preference: z.string().nonempty({ message: 'Work preference field is required.' }),
-  travel_willingness: z.string(),
-});
-
 export function PreferencesForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resumeFile, setResumeFile] = useState<File>();
   const [activeTab, setActiveTab] = useState(String(tabs[0]));
-  const [selectedTechSkills, setSelectedTechSkills] = useState<string[]>([]);
-  const [selectedSoftSkills, setSelectedSoftSkills] = useState<string[]>([]);
+  const [fileUploadError, setFileUploadError] = useState<string>('');
 
-  const form = useForm<z.infer<typeof preferenceSchema>>({
-    resolver: zodResolver(preferenceSchema),
+  const form = useForm<PreferencesSchemaType>({
+    resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      first_name: '',
-      last_name: '',
-      email: '',
-      phone: 123456780,
-      address: '',
-      degree: '',
-      course: '',
-      university: '',
-      graduated_year: 2024,
-      desired_role: '',
-      desired_location: '',
-      minimum_salary: 300000,
-      years_of_experience: 2,
-      work_preference: WorkPreferences[0]?.value,
-      travel_willingness: '',
+      personalInfo: {
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        address: '',
+        degree: '',
+        course: '',
+        university: '',
+        graduated_year: '',
+      },
+      skills: {
+        tech_skills: [],
+        soft_skills: [],
+      },
+      jobPreferences: {
+        desired_role: '',
+        desired_location: '',
+        current_lpa: '',
+        years_of_experience: '',
+        travel_willingness: '',
+        experience_level: [],
+        job_type: [],
+        work_location_type: [],
+      },
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -107,17 +72,21 @@ export function PreferencesForm() {
   const readFile = () => {
     if (fileInputRef.current?.files && fileInputRef.current?.files?.length > 0) {
       const file = fileInputRef.current.files[0];
-
       const reader = new FileReader();
+
       reader.onload = () => {
-        if (file && file.size > 100 * 1024) {
+        if (file && file.size > 50 * 1024) {
           if (file.size > 5000 * 1024) {
-            toast('Maximum file size is below 5MB');
+            setFileUploadError('Maximum file size is below 5MB');
           } else {
             setResumeFile(file);
           }
         } else {
-          toast('Minimum file size is upto 100KB');
+          if (file?.type === 'docx') {
+            setFileUploadError('Minimum file size is upto 1KB');
+          } else {
+            setFileUploadError('Minimum file size is upto 50KB');
+          }
         }
       };
       if (file) {
@@ -126,11 +95,11 @@ export function PreferencesForm() {
     }
   };
 
-  async function onSubmit(values: z.infer<typeof preferenceSchema>) {
+  async function onSubmit(values: z.infer<typeof preferencesSchema>) {
     const data = {
-      ...values,
-      tech_skills: selectedTechSkills,
-      soft_skills: selectedSoftSkills,
+      ...values.personalInfo,
+      ...values.jobPreferences,
+      ...values.skills,
     };
 
     console.log('Form Data:', data);
@@ -139,48 +108,26 @@ export function PreferencesForm() {
     router.push('/home');
   }
 
-  const fieldTab = Object.keys(form.formState.errors).map((key) => fieldTapsMap[key]);
-
   const onNextTab = async () => {
     const index = tabs.indexOf(activeTab);
 
-    if (!form.formState.isSubmitted) {
-      await form.handleSubmit(onSubmit)();
-    }
-
-    switch (form.formState.isSubmitted) {
-      case fieldTab.includes(tabs[0]): {
-        return setActiveTab(String(tabs[0]));
-      }
-      case resumeFile === undefined: {
-        return setActiveTab(String(tabs[1]));
-      }
-      case selectedSoftSkills.length === 0 || selectedTechSkills.length === 0: {
-        return setActiveTab(String(tabs[2]));
-      }
-      case fieldTab.includes(tabs[3]): {
-        return setActiveTab(String(tabs[3]));
-      }
-    }
-
-    if (form.formState.isSubmitted) return setActiveTab(String(tabs[index + 1]));
-  };
-
-  function disableOnNextTab(): boolean {
     switch (activeTab) {
       case tabs[0]: {
-        return fieldTab.includes(activeTab);
+        const isValid = await form.trigger('personalInfo');
+        return isValid && setActiveTab(String(tabs[index + 1]));
       }
       case tabs[1]: {
-        return resumeFile === undefined;
+        if (resumeFile === undefined) {
+          setFileUploadError('Upload your resume');
+        }
+        return resumeFile !== undefined && setActiveTab(String(tabs[index + 1]));
       }
       case tabs[2]: {
-        return selectedSoftSkills.length === 0 || selectedTechSkills.length === 0;
+        const isValid = await form.trigger('skills');
+        return isValid && setActiveTab(String(tabs[index + 1]));
       }
-      default:
-        return false;
     }
-  }
+  };
 
   const onPrevTab = async () => {
     const index = tabs.indexOf(activeTab);
@@ -211,7 +158,7 @@ export function PreferencesForm() {
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
-                  name="first_name"
+                  name="personalInfo.first_name"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="first_name">First Name</FormLabel>
@@ -224,7 +171,7 @@ export function PreferencesForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="last_name"
+                  name="personalInfo.last_name"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="last_name">Last Name</FormLabel>
@@ -239,7 +186,7 @@ export function PreferencesForm() {
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="personalInfo.email"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="email">Email</FormLabel>
@@ -252,12 +199,12 @@ export function PreferencesForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="personalInfo.phone"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="phone">Phone</FormLabel>
                       <FormControl>
-                        <Input id="phone" placeholder="+91 1234567890" {...field} />
+                        <Input id="phone" type="string" placeholder="+91 1234567890" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -266,7 +213,7 @@ export function PreferencesForm() {
               </div>
               <FormField
                 control={form.control}
-                name="address"
+                name="personalInfo.address"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel htmlFor="address">Address</FormLabel>
@@ -287,7 +234,7 @@ export function PreferencesForm() {
             <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
               <FormField
                 control={form.control}
-                name="degree"
+                name="personalInfo.degree"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel htmlFor="degree">Degree</FormLabel>
@@ -300,7 +247,7 @@ export function PreferencesForm() {
               />
               <FormField
                 control={form.control}
-                name="course"
+                name="personalInfo.course"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel htmlFor="course">Course</FormLabel>
@@ -315,7 +262,7 @@ export function PreferencesForm() {
             <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
               <FormField
                 control={form.control}
-                name="university"
+                name="personalInfo.university"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel htmlFor="university">University</FormLabel>
@@ -328,7 +275,7 @@ export function PreferencesForm() {
               />
               <FormField
                 control={form.control}
-                name="graduated_year"
+                name="personalInfo.graduated_year"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel htmlFor="gratuated_year">Gratuation Year</FormLabel>
@@ -371,6 +318,9 @@ export function PreferencesForm() {
                 <Button type="button" onClick={() => fileInputRef.current?.click()}>
                   Browse file
                 </Button>
+                {resumeFile === undefined && fileUploadError && (
+                  <p className="text-destructive text-sm">{fileUploadError}</p>
+                )}
               </div>
               <div className="flex w-full border-t" />
               <div className="flex w-full flex-col items-start justify-start gap-2">
@@ -388,28 +338,44 @@ export function PreferencesForm() {
               <div className="text-md font-bold">Skills</div>
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <Label>Technology Skills</Label>
-              <MultiSelectDropdown
-                placeholder="Add skills..."
-                selected={selectedTechSkills}
-                setSelected={setSelectedTechSkills}
-                items={Object.values(TechSkills.technologySkills).flat()}
+              <FormField
+                control={form.control}
+                name="skills.tech_skills"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <MultiSelectDropdown
+                        label="Tech Skills"
+                        placeholder="Add skills..."
+                        error={form.formState.errors.skills?.tech_skills?.message}
+                        selected={field.value}
+                        setSelected={field.onChange}
+                        items={Object.values(TechSkills.technologySkills).flat()}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-              {selectedTechSkills.length === 0 && (
-                <p className="text-destructive text-sm">Specify atleast one Skill.</p>
-              )}
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <Label>Soft Skills</Label>
-              <MultiSelectDropdown
-                placeholder="Add skills..."
-                selected={selectedSoftSkills}
-                setSelected={setSelectedSoftSkills}
-                items={Object.values(SoftSkills.softSkills).flat()}
+              <FormField
+                control={form.control}
+                name="skills.soft_skills"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <MultiSelectDropdown
+                        label="Soft Skills"
+                        placeholder="Add skills..."
+                        error={form.formState.errors.skills?.soft_skills?.message}
+                        selected={field.value}
+                        setSelected={field.onChange}
+                        items={Object.values(SoftSkills.softSkills).flat()}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-              {selectedSoftSkills.length === 0 && (
-                <p className="text-destructive text-sm">Specify atleast one Skill.</p>
-              )}
             </div>
           </TabsContent>
           <TabsContent value={String(tabs[3])} className="flex flex-col gap-2">
@@ -420,7 +386,7 @@ export function PreferencesForm() {
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
-                  name="desired_role"
+                  name="jobPreferences.desired_role"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="desired_role">Desired Role</FormLabel>
@@ -433,7 +399,7 @@ export function PreferencesForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="desired_location"
+                  name="jobPreferences.desired_location"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="desired_location">Desired Location</FormLabel>
@@ -448,12 +414,12 @@ export function PreferencesForm() {
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
                   control={form.control}
-                  name="minimum_salary"
+                  name="jobPreferences.current_lpa"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel htmlFor="minimum_salary">Minimum Salary (Rupees) </FormLabel>
+                      <FormLabel htmlFor="current_lpa">Current CTC</FormLabel>
                       <FormControl>
-                        <Input id="minimum_salary" placeholder="300000" type="number" {...field} />
+                        <Input id="current_lpa" placeholder="4" type="number" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -461,7 +427,7 @@ export function PreferencesForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="years_of_experience"
+                  name="jobPreferences.years_of_experience"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="years_of_experience">Years of Experience</FormLabel>
@@ -473,34 +439,74 @@ export function PreferencesForm() {
                   )}
                 />
               </div>
-              <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
-                <FormField
-                  control={form.control}
-                  name="work_preference"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel htmlFor="work_preference">Work Preference</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl className="w-full">
-                          <SelectTrigger className="shadow">
-                            <SelectValue />
-                          </SelectTrigger>
+              <div className="grid w-full grid-rows-1 gap-2 md:grid-cols-2">
+                <div className="flex flex-col justify-start overflow-hidden">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.experience_level"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <MultiSelectDropdown
+                            label="Experience Level"
+                            placeholder="Select experience level..."
+                            error={form.formState.errors.jobPreferences?.experience_level?.message}
+                            selected={field.value}
+                            setSelected={field.onChange}
+                            items={jobExperienceLevels}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {WorkPreferences.map((pref, i) => (
-                            <SelectItem key={`work-preference-${i}`} value={pref.value}>
-                              {pref.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col justify-start overflow-hidden">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.job_type"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <MultiSelectDropdown
+                            label="Jobs type"
+                            placeholder="Select job type..."
+                            error={form.formState.errors.jobPreferences?.job_type?.message}
+                            selected={field.value}
+                            setSelected={field.onChange}
+                            items={employeeJobTypes}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="grid w-full grid-rows-1 gap-2 md:grid-cols-2">
+                <div className="flex flex-col overflow-hidden">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.work_location_type"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <MultiSelectDropdown
+                            label="Work location type"
+                            placeholder="Select work location..."
+                            error={
+                              form.formState.errors.jobPreferences?.work_location_type?.message
+                            }
+                            selected={field.value}
+                            setSelected={field.onChange}
+                            items={workLocationTypes}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="travel_willingness"
+                  name="jobPreferences.travel_willingness"
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel htmlFor="travel_willingness">Travel Willingness</FormLabel>
@@ -532,17 +538,11 @@ export function PreferencesForm() {
               variant="secondary"
               type="button"
               hidden={activeTab === tabs[tabs.length - 1]}
-              disabled={disableOnNextTab()}
               onClick={onNextTab}
             >
               Next
             </Button>
-            <Button
-              disabled={Object.keys(form.formState.errors).length !== 0}
-              hidden={activeTab !== tabs[tabs.length - 1]}
-            >
-              Save
-            </Button>
+            <Button hidden={activeTab !== tabs[tabs.length - 1]}>Save</Button>
           </div>
         </form>
       </Form>
