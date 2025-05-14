@@ -6,7 +6,7 @@ export const preferencesSchema = z.object({
     first_name: z.string().min(3, { message: 'First name must be at least 3 characters long.' }),
     last_name: z.string().min(1, { message: 'Last name must be at least 1 characters long.' }),
     email: z.string().email({
-      message: 'Please enter a valid email address.',
+      message: 'Enter a valid email address.',
     }),
     phone: z.string().refine(
       (value) => {
@@ -14,32 +14,28 @@ export const preferencesSchema = z.object({
         return phone?.isValid();
       },
       {
-        message: 'Invalid phone number. Use international format like +1234567890.',
+        message: 'Enter a valid phone number.',
       },
     ),
-    address: z.string().nonempty({ message: 'Address field is required.' }),
-    degree: z.string().nonempty({ message: 'Degree field is required.' }),
-    course: z.string().nonempty({ message: 'Course field is required.' }),
+    address: z.string().nonempty({ message: 'Address is required.' }),
+    degree: z.string().nonempty({ message: 'Degree is required.' }),
+    course: z.string().nonempty({ message: 'Course is required.' }),
     university: z.string().nonempty({ message: 'Specify your college/school name.' }),
     graduated_year: z
       .string()
-      .min(4, { message: 'Year must be contain 4 characters.' })
-      .max(4, { message: 'Year must be contain 4 characters.' })
-      .nonempty({ message: 'Graduation year field is required.' }),
-  }),
-  skills: z.object({
-    tech_skills: z.array(z.string()).nonempty({ message: 'Specify technology skills.' }),
-    soft_skills: z.array(z.string()).nonempty({ message: 'Specify soft skills.' }),
+      .min(4, { message: 'Year must contain atleast 4 characters' })
+      .max(4)
+      .nonempty({ message: 'Graduation year is required.' }),
   }),
   jobPreferences: z.object({
-    desired_role: z.string().nonempty({ message: 'Desired role field is required.' }),
-    desired_location: z.string().nonempty({ message: 'Specify your desired location.' }),
+    role: z.string().nonempty({ message: 'Role is required.' }),
+    location: z.string().nonempty({ message: 'Specify your location.' }),
     current_lpa: z.string().nonempty({ message: 'Describe current salary in LPA.' }),
     years_of_experience: z.string().nonempty({ message: 'Enter your years of work experience.' }),
     experience_level: z.array(z.string()).nonempty({ message: 'Specify experience level.' }),
     job_type: z.array(z.string()).nonempty({ message: 'Specify job type.' }),
-    work_location_type: z.array(z.string()).nonempty({ message: 'Specify work location type.' }),
-    travel_willingness: z.string(),
+    work_mode: z.array(z.string()).nonempty({ message: 'Specify work location type.' }),
+    skills: z.array(z.string()).nonempty({ message: 'Specify at least one skill.' }),
   }),
 });
 

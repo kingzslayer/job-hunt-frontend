@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -15,6 +15,7 @@ interface MultiSelectDropdownProps {
   items: string[];
   label?: string;
   error?: string;
+  required?: boolean;
   selected: string[];
   placeholder?: string;
   setSelected: (string: string[]) => void;
@@ -23,8 +24,9 @@ interface MultiSelectDropdownProps {
 export const MultiSelectDropdown = ({
   items,
   label,
-  selected,
   error,
+  selected,
+  required,
   setSelected,
   placeholder,
 }: MultiSelectDropdownProps) => {
@@ -48,6 +50,24 @@ export const MultiSelectDropdown = ({
     setFilteredItems(items.filter((item) => item.toLowerCase().includes(query.toLowerCase())));
   };
 
+  const handleSearchFocus = (open: boolean) => {
+    setOpen(open);
+    if (inputRef.current && open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+        setOpen(true);
+      }, 10);
+    }
+  };
+
+  const handleSearchQuery = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      setOpen(open);
+    }
+    setQuery(event.target.value);
+    handleFilter(event.target.value);
+  };
+
   useEffect(() => {
     if (inputRef.current && divRef.current) {
       setWidth(divRef.current.offsetWidth);
@@ -56,22 +76,14 @@ export const MultiSelectDropdown = ({
 
   return (
     <div className="my-1 flex flex-col space-y-1">
-      {label && <Label>{label}</Label>}
+      {label && (
+        <Label>
+          {label} {required && <span className="text-destructive">*</span>}
+        </Label>
+      )}
       <div className="border-input flex flex-col overflow-hidden rounded-md border shadow-sm">
         <div ref={divRef} className="flex h-9 w-full flex-col">
-          <DropdownMenu
-            open={open}
-            modal={false}
-            onOpenChange={(open) => {
-              setOpen(open);
-              if (inputRef.current && open) {
-                setTimeout(() => {
-                  inputRef.current?.focus();
-                  setOpen(true);
-                }, 10);
-              }
-            }}
-          >
+          <DropdownMenu open={open} modal={false} onOpenChange={handleSearchFocus}>
             <DropdownMenuTrigger
               className={cn(
                 open ? 'border-primary' : 'border-transparent',
@@ -84,13 +96,7 @@ export const MultiSelectDropdown = ({
                 value={query}
                 className="border-0 shadow-none ring-0 outline-0 outline-none focus:outline-0 focus-visible:ring-0"
                 placeholder={placeholder}
-                onChange={(event) => {
-                  if (event.target.value) {
-                    setOpen(open);
-                  }
-                  setQuery(event.target.value);
-                  handleFilter(event.target.value);
-                }}
+                onChange={handleSearchQuery}
               />
               <ChevronDown className="mx-2 size-6 cursor-pointer" />
             </DropdownMenuTrigger>
@@ -126,9 +132,16 @@ export const MultiSelectDropdown = ({
           </DropdownMenu>
         </div>
         {selected.length > 0 && (
+          <div className="my-1 flex w-full items-center justify-end px-2">
+            <div className="cursor-pointer text-xs hover:underline" onClick={() => setSelected([])}>
+              Clear
+            </div>
+          </div>
+        )}
+        {selected.length > 0 && (
           <div
             className={cn(
-              selected.length > 0 && 'py-2',
+              selected.length > 0 && 'pt-1 pb-2',
               'flex w-full flex-row flex-wrap gap-2 px-2 text-xs',
             )}
           >
