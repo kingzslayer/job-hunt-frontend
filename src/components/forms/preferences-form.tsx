@@ -71,17 +71,11 @@ export function PreferencesForm() {
       const reader = new FileReader();
 
       reader.onload = () => {
-        if (file && file.size > 50 * 1024) {
-          if (file.size > 5000 * 1024) {
-            setFileUploadError('Maximum file size is below 5MB');
+        if (file) {
+          if (file.size > 2000 * 1024) {
+            setFileUploadError('Maximum file size is below 2MB');
           } else {
             setResumeFile(file);
-          }
-        } else {
-          if (file?.type === 'docx') {
-            setFileUploadError('Minimum file size is upto 1KB');
-          } else {
-            setFileUploadError('Minimum file size is upto 50KB');
           }
         }
       };
@@ -158,7 +152,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="first_name" placeholder="John" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -173,7 +166,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="last_name" placeholder="Doe" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -226,7 +218,6 @@ export function PreferencesForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -244,7 +235,6 @@ export function PreferencesForm() {
                     <FormControl>
                       <Input id="degree" placeholder="Bachelor of science" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -259,7 +249,6 @@ export function PreferencesForm() {
                     <FormControl>
                       <Input id="course" placeholder="Computer Science" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -276,7 +265,6 @@ export function PreferencesForm() {
                     <FormControl>
                       <Input id="university" placeholder="Stanford University" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -291,7 +279,6 @@ export function PreferencesForm() {
                     <FormControl>
                       <Input id="gratuated_year" type="number" placeholder="2024" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -359,7 +346,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="role" placeholder="Human Resource" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -374,7 +360,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="location" placeholder="San Francisco, CA" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -391,7 +376,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="current_lpa" placeholder="4" type="number" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -406,7 +390,6 @@ export function PreferencesForm() {
                       <FormControl>
                         <Input id="years_of_experience" placeholder="2" type="number" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -422,7 +405,6 @@ export function PreferencesForm() {
                           required
                           label="Skills"
                           placeholder="Select known skills..."
-                          error={form.formState.errors.jobPreferences?.skills?.message}
                           selected={field.value}
                           setSelected={field.onChange}
                           items={Object.values(TechSkills.technologySkills).flat()}
@@ -443,7 +425,6 @@ export function PreferencesForm() {
                           required
                           label="Experience Level"
                           placeholder="Select experience level..."
-                          error={form.formState.errors.jobPreferences?.experience_level?.message}
                           selected={field.value}
                           setSelected={field.onChange}
                           items={jobExperienceLevels}
@@ -464,7 +445,6 @@ export function PreferencesForm() {
                           required
                           label="Job type"
                           placeholder="Select job type..."
-                          error={form.formState.errors.jobPreferences?.job_type?.message}
                           selected={field.value}
                           setSelected={field.onChange}
                           items={employeeJobTypes}
@@ -485,7 +465,6 @@ export function PreferencesForm() {
                           required
                           label="Work mode"
                           placeholder="Select work mode..."
-                          error={form.formState.errors.jobPreferences?.work_mode?.message}
                           selected={field.value}
                           setSelected={field.onChange}
                           items={workLocationTypes}
