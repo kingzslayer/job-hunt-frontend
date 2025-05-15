@@ -29,7 +29,7 @@ export const preferencesSchema = z.object({
   }),
   jobPreferences: z.object({
     role: z.string().nonempty({ message: 'Role is required.' }),
-    location: z.string().nonempty({ message: 'Specify your location.' }),
+    locations: z.array(z.string()).nonempty({ message: 'Specify your location.' }),
     current_lpa: z.string().nonempty({ message: 'Describe current salary in LPA.' }),
     years_of_experience: z.string().nonempty({ message: 'Enter your years of work experience.' }),
     experience_level: z.array(z.string()).nonempty({ message: 'Specify experience level.' }),

@@ -12,7 +12,7 @@ import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
 
-import { TechSkills } from '@/lib/skills';
+import { techSkills } from '@/lib/skills';
 import { toast } from 'sonner';
 import { MultiSelectDropdown } from '../common/dropdown';
 import { useRouter } from 'next/navigation';
@@ -52,7 +52,7 @@ export function PreferencesForm() {
       },
       jobPreferences: {
         role: '',
-        location: '',
+        locations: [],
         current_lpa: '',
         years_of_experience: '',
         experience_level: [],
@@ -349,20 +349,29 @@ export function PreferencesForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="jobPreferences.location"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel required htmlFor="location">
-                        Location
-                      </FormLabel>
-                      <FormControl>
-                        <Input id="location" placeholder="San Francisco, CA" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="flex w-full">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.locations"
+                    render={({ field }) => (
+                      <FormItem className="w-full space-y-0 shadow-md">
+                        <FormLabel required htmlFor="locations">
+                          Location(s)
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelectDropdown
+                            required
+                            placeholder="Specify location..."
+                            selected={field.value}
+                            mode="add"
+                            setSelected={field.onChange}
+                            items={[]}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               <div className="flex w-full flex-col justify-between gap-2 md:flex-row">
                 <FormField
@@ -394,36 +403,36 @@ export function PreferencesForm() {
                   )}
                 />
               </div>
-              <div className="flex w-full overflow-hidden">
+              <div className="flex w-full">
                 <FormField
                   control={form.control}
                   name="jobPreferences.skills"
                   render={({ field }) => (
                     <FormItem className="w-full">
+                      <FormLabel required>Skills</FormLabel>
                       <FormControl>
                         <MultiSelectDropdown
                           required
-                          label="Skills"
-                          placeholder="Select known skills..."
+                          placeholder="Select skills..."
                           selected={field.value}
                           setSelected={field.onChange}
-                          items={Object.values(TechSkills.technologySkills).flat()}
+                          items={techSkills}
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex w-full overflow-hidden">
+              <div className="flex w-full">
                 <FormField
                   control={form.control}
                   name="jobPreferences.experience_level"
                   render={({ field }) => (
                     <FormItem className="w-full">
+                      <FormLabel required>Experience Level</FormLabel>
                       <FormControl>
                         <MultiSelectDropdown
                           required
-                          label="Experience Level"
                           placeholder="Select experience level..."
                           selected={field.value}
                           setSelected={field.onChange}
@@ -434,45 +443,47 @@ export function PreferencesForm() {
                   )}
                 />
               </div>
-              <div className="flex w-full overflow-hidden">
-                <FormField
-                  control={form.control}
-                  name="jobPreferences.job_type"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <MultiSelectDropdown
-                          required
-                          label="Job type"
-                          placeholder="Select job type..."
-                          selected={field.value}
-                          setSelected={field.onChange}
-                          items={employeeJobTypes}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex w-full overflow-hidden">
-                <FormField
-                  control={form.control}
-                  name="jobPreferences.work_mode"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <MultiSelectDropdown
-                          required
-                          label="Work mode"
-                          placeholder="Select work mode..."
-                          selected={field.value}
-                          setSelected={field.onChange}
-                          items={workLocationTypes}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+              <div className="flex w-full flex-col gap-2 md:flex-row">
+                <div className="flex w-full">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.job_type"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel required>Job type</FormLabel>
+                        <FormControl>
+                          <MultiSelectDropdown
+                            required
+                            placeholder="Select job type..."
+                            selected={field.value}
+                            setSelected={field.onChange}
+                            items={employeeJobTypes}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex w-full">
+                  <FormField
+                    control={form.control}
+                    name="jobPreferences.work_mode"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel required>Work mode</FormLabel>
+                        <FormControl>
+                          <MultiSelectDropdown
+                            required
+                            placeholder="Select work mode..."
+                            selected={field.value}
+                            setSelected={field.onChange}
+                            items={workLocationTypes}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>

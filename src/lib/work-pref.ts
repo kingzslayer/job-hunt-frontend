@@ -7,6 +7,6 @@ export const jobExperienceLevels = [
   'Executive',
 ];
 
-export const employeeJobTypes = ['Full-time', 'Part-time', 'Temporary', 'Contract'];
+export const employeeJobTypes = ['Full-time', 'Part-time', 'Temporary', 'Contract', 'Internship'];
 
 export const workLocationTypes = ['On-site', 'Remote', 'Hybrid'];
