@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -53,6 +53,15 @@ export const MultiSelectDropdown = ({
     setFilteredItems(items.filter((item) => item.toLowerCase().includes(query.toLowerCase())));
   };
 
+  const inputValidate = (event: FormEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+
+    input.value = input.value
+      .replace(/[^A-Za-z ]/g, '') // remove unwanted chars
+      .replace(/\s{2,}/g, ' ') // normalize spaces
+      .replace(/^\s+/, '');
+  };
+
   const handleSearchFocus = (open: boolean) => {
     setOpen(open);
     if (inputRef.current && open) {
@@ -91,7 +100,7 @@ export const MultiSelectDropdown = ({
   return (
     <div className="mb-1 flex flex-col space-y-1 overflow-hidden rounded-md shadow-sm">
       {label && (
-        <Label>
+        <Label htmlFor={label}>
           {label} {required && <span className="text-destructive">*</span>}
         </Label>
       )}
@@ -109,6 +118,7 @@ export const MultiSelectDropdown = ({
                   id={label}
                   ref={inputRef}
                   value={query}
+                  onInput={inputValidate}
                   onFocus={() => setFocus(true)}
                   className="h-8 border-0 shadow-none ring-0 outline-0 outline-none focus:outline-0 focus-visible:ring-0"
                   placeholder={placeholder}
@@ -117,14 +127,14 @@ export const MultiSelectDropdown = ({
               </DropdownMenuTrigger>
               {selected.length > 0 ? (
                 <X
-                  className="hover:text-destructive mx-2 size-5 cursor-pointer"
+                  className="hover:text-destructive mx-2 size-4 cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     setSelected([]);
                   }}
                 />
               ) : (
-                <ChevronDown className="mx-2 size-5 cursor-pointer" />
+                <ChevronDown className="mx-2 size-4 cursor-pointer" />
               )}
             </div>
             <DropdownMenuContent
@@ -186,11 +196,16 @@ export const MultiSelectDropdown = ({
               }}
               onChange={handleSearchQuery}
             />
-            <div
-              className={cn(focus && 'hover:bg-primary/20', 'flex h-8 items-center justify-center')}
-            >
-              <Plus className="mx-2 size-5 cursor-pointer" onClick={handleAddItem} />
-            </div>
+            {query.length > 0 && (
+              <div
+                className={cn(
+                  focus && 'hover:bg-primary/20',
+                  'flex h-8 items-center justify-center',
+                )}
+              >
+                <Plus className="mx-2 size-4 cursor-pointer" onClick={handleAddItem} />
+              </div>
+            )}
           </div>
         )}
         {selected.length > 0 && (

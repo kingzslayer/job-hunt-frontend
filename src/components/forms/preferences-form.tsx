@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import { useRef, useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Upload } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
 
@@ -85,6 +85,22 @@ export function PreferencesForm() {
     }
   };
 
+  const inputValidate = (event: FormEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+
+    if (input.type === 'tel') {
+      input.value = input.value
+        .replace(/[^\d+\-\s]/g, '') // Allow digits, +, -, space
+        .replace(/[\s\-]{2,}/g, '') // Collapse repeated - or space
+        .replace(/^\s+/, ''); // Remove leading spaces
+    } else {
+      input.value = input.value
+        .replace(/[^A-Za-z ]/g, '') // remove unwanted chars
+        .replace(/\s{2,}/g, ' ') // normalize spaces
+        .replace(/^\s+/, '');
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof preferencesSchema>) {
     const data = {
       ...values.personalInfo,
@@ -150,7 +166,12 @@ export function PreferencesForm() {
                         First Name
                       </FormLabel>
                       <FormControl>
-                        <Input id="first_name" placeholder="John" {...field} />
+                        <Input
+                          id="first_name"
+                          placeholder="John"
+                          onInput={inputValidate}
+                          {...field}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -164,7 +185,12 @@ export function PreferencesForm() {
                         Last Name
                       </FormLabel>
                       <FormControl>
-                        <Input id="last_name" placeholder="Doe" {...field} />
+                        <Input
+                          id="last_name"
+                          placeholder="Doe"
+                          onInput={inputValidate}
+                          {...field}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -195,7 +221,13 @@ export function PreferencesForm() {
                         Phone
                       </FormLabel>
                       <FormControl>
-                        <Input id="phone" type="string" placeholder="+91 1234567890" {...field} />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="+91 1234567890"
+                          onInput={inputValidate}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,7 +265,12 @@ export function PreferencesForm() {
                       Degree
                     </FormLabel>
                     <FormControl>
-                      <Input id="degree" placeholder="Bachelor of science" {...field} />
+                      <Input
+                        id="degree"
+                        placeholder="Bachelor of science"
+                        onInput={inputValidate}
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -247,7 +284,12 @@ export function PreferencesForm() {
                       Course
                     </FormLabel>
                     <FormControl>
-                      <Input id="course" placeholder="Computer Science" {...field} />
+                      <Input
+                        id="course"
+                        placeholder="Computer Science"
+                        onInput={inputValidate}
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -263,7 +305,12 @@ export function PreferencesForm() {
                       University
                     </FormLabel>
                     <FormControl>
-                      <Input id="university" placeholder="Stanford University" {...field} />
+                      <Input
+                        id="university"
+                        placeholder="Stanford University"
+                        onInput={inputValidate}
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -344,7 +391,12 @@ export function PreferencesForm() {
                         Role
                       </FormLabel>
                       <FormControl>
-                        <Input id="role" placeholder="Human Resource" {...field} />
+                        <Input
+                          id="role"
+                          placeholder="Human Resources"
+                          onInput={inputValidate}
+                          {...field}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
