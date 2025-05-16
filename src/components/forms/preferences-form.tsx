@@ -246,6 +246,12 @@ export function PreferencesForm() {
                       <Textarea
                         id="address"
                         className="max-h-20"
+                        onInput={(event) => {
+                          const input = event.currentTarget;
+                          input.value = input.value
+                            .replace(/[^a-zA-Z0-9-,/() \n ]/g, '')
+                            .replace(/^\s+/, ''); // normalize spaces;
+                        }}
                         placeholder="123 Main St, San Francisco, CA 94105"
                         {...field}
                       />
