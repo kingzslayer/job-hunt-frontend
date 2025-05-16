@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -7,32 +7,41 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Input } from '../ui/input';
-import { X } from 'lucide-react';
+import { ChevronDown, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Label } from '../ui/label';
 
 interface MultiSelectDropdownProps {
   items: string[];
+  label?: string;
+  error?: string;
+  mode?: 'default' | 'add';
+  required?: boolean;
   selected: string[];
   placeholder?: string;
-  setSelected: Dispatch<SetStateAction<string[]>>;
+  setSelected: (string: string[]) => void;
 }
 
 export const MultiSelectDropdown = ({
   items,
+  label,
+  error,
   selected,
+  required,
+  mode = 'default',
   setSelected,
   placeholder,
 }: MultiSelectDropdownProps) => {
+  const divRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState<string>('');
-  const [width, setWidth] = useState<number>(200);
+  const [width, setWidth] = useState<number>(100);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [focus, setFocus] = useState<boolean>(false);
   const [filteredItems, setFilteredItems] = useState<string[]>(items);
 
   const handleSelectItem = (item: string) => {
-    setSelected((prev: string[]) =>
-      prev.includes(item) ? prev.filter((s) => s !== item) : [...prev, item],
-    );
+    setSelected(selected.includes(item) ? selected.filter((s) => s !== item) : [...selected, item]);
     if (filteredItems.length === 0) {
       setFilteredItems(items);
     }
@@ -44,95 +53,187 @@ export const MultiSelectDropdown = ({
     setFilteredItems(items.filter((item) => item.toLowerCase().includes(query.toLowerCase())));
   };
 
-  useEffect(() => {
-    if (inputRef.current) {
-      setWidth(inputRef.current.offsetWidth);
+  const inputValidate = (event: FormEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+
+    input.value = input.value
+      .replace(/[^A-Za-z ]/g, '') // remove unwanted chars
+      .replace(/\s{2,}/g, ' ') // normalize spaces
+      .replace(/^\s+/, '');
+  };
+
+  const handleSearchFocus = (open: boolean) => {
+    setOpen(open);
+    if (inputRef.current && open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+        setOpen(true);
+      }, 10);
     }
-  }, [inputRef, open]);
+  };
+
+  const handleAddItem = () => {
+    setFocus(true);
+    setQuery('');
+    inputRef.current?.focus();
+    if (query !== '' && !selected.includes(query)) {
+      setSelected([...selected, query]);
+    }
+  };
+
+  const handleSearchQuery = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      handleSearchFocus(true);
+    }
+    setQuery(event.target.value);
+    if (mode !== 'add') {
+      handleFilter(event.target.value);
+    }
+  };
+
+  useEffect(() => {
+    if (inputRef.current && divRef.current && mode !== 'add') {
+      setWidth(divRef.current.offsetWidth);
+    }
+  }, [inputRef, open, mode]);
 
   return (
-    <div className="flex flex-col overflow-hidden border">
-      <DropdownMenu
-        open={open}
-        modal={false}
-        onOpenChange={(open) => {
-          setOpen(open);
-          if (inputRef.current && open) {
-            setTimeout(() => {
-              inputRef.current?.focus();
-              setOpen(true);
-            }, 10);
-          }
-        }}
-      >
-        <DropdownMenuTrigger className="flex">
-          <Input
-            id="query_input"
-            ref={inputRef}
-            value={query}
-            className="focus:border-primary border-x-0 border-y-0 ring-0 outline-0 outline-none focus:border-b focus:outline-0 focus-visible:ring-0"
-            placeholder={placeholder}
-            onChange={(event) => {
-              if (event.target.value) {
-                setOpen(open);
-              }
-              setQuery(event.target.value);
-              handleFilter(event.target.value);
-            }}
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent tabIndex={0} style={{ width: width }} className="max-h-80 min-w-sm">
-          {filteredItems.map((item, i) => (
-            <DropdownMenuCheckboxItem
-              key={`dropdown-item-${item}-${i}`}
-              tabIndex={-1}
-              onSelect={(e) => {
-                e.preventDefault(); // Prevent closing
-              }}
-              checked={selected.includes(item)}
-              onCheckedChange={() => handleSelectItem(item)}
-            >
-              {item}
-            </DropdownMenuCheckboxItem>
-          ))}
-          {filteredItems.length === 0 && (
-            <div className="flex flex-col">
-              <div className="p-2 text-sm">No search result found.</div>{' '}
-              <DropdownMenuItem
-                tabIndex={-1}
-                onClick={() => {
-                  handleSelectItem(query);
-                  setOpen(false);
-                }}
-              >
-                {query}
-              </DropdownMenuItem>
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <div
-        className={cn(
-          selected.length > 0 && 'py-2',
-          'flex w-full flex-row flex-wrap gap-2 px-2 text-xs',
-        )}
-      >
-        {selected
-          .sort((a, b) => a.localeCompare(b))
-          .map((item) => (
+    <div className="mb-1 flex flex-col space-y-1 overflow-hidden rounded-md shadow-sm">
+      {label && (
+        <Label htmlFor={label}>
+          {label} {required && <span className="text-destructive">*</span>}
+        </Label>
+      )}
+      <div ref={divRef} className="border-input flex flex-col overflow-hidden rounded-md border">
+        {mode === 'default' && (
+          <DropdownMenu open={open} modal={false} onOpenChange={handleSearchFocus}>
             <div
-              key={item}
-              title={item}
-              className="bg-primary/15 flex h-7 cursor-pointer items-center justify-center gap-2 rounded-full p-1 px-3 whitespace-nowrap"
+              className={cn(
+                open ? 'border-primary' : 'border-transparent',
+                'flex w-full flex-row items-center justify-end overflow-hidden border-b-2',
+              )}
             >
-              {item}
-              <X
-                className="hover:text-destructive size-4"
-                onClick={() => setSelected([...selected.filter((fn) => fn !== item)])}
-              />
+              <DropdownMenuTrigger className="flex w-full items-center">
+                <Input
+                  id={label}
+                  ref={inputRef}
+                  value={query}
+                  onInput={inputValidate}
+                  onFocus={() => setFocus(true)}
+                  className="h-8 border-0 shadow-none ring-0 outline-0 outline-none focus:outline-0 focus-visible:ring-0"
+                  placeholder={placeholder}
+                  onChange={handleSearchQuery}
+                />
+              </DropdownMenuTrigger>
+              {selected.length > 0 ? (
+                <X
+                  className="hover:text-destructive mx-2 size-4 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelected([]);
+                  }}
+                />
+              ) : (
+                <ChevronDown className="mx-2 size-4 cursor-pointer" />
+              )}
             </div>
-          ))}
+            <DropdownMenuContent
+              align="start"
+              tabIndex={0}
+              style={{ width: width }}
+              className="max-h-80"
+            >
+              {filteredItems.map((item, i) => (
+                <DropdownMenuCheckboxItem
+                  key={`dropdown-item-${item}-${i}`}
+                  tabIndex={-1}
+                  onSelect={(e) => {
+                    e.preventDefault(); // Prevent closing
+                  }}
+                  checked={selected.includes(item)}
+                  onCheckedChange={() => handleSelectItem(item)}
+                >
+                  {item}
+                </DropdownMenuCheckboxItem>
+              ))}
+              {filteredItems.length === 0 && (
+                <div className="flex flex-col">
+                  <div className="p-2 text-sm">No search result found.</div>{' '}
+                  <DropdownMenuItem
+                    tabIndex={-1}
+                    onClick={() => {
+                      handleSelectItem(query);
+                      setOpen(false);
+                    }}
+                  >
+                    {query}
+                  </DropdownMenuItem>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        {mode === 'add' && (
+          <div
+            className={cn(
+              focus ? 'border-primary' : 'border-transparent',
+              'flex w-full flex-row items-center justify-end overflow-hidden border-b-2',
+            )}
+          >
+            <Input
+              id={label}
+              ref={inputRef}
+              value={query}
+              onFocus={() => setFocus(true)}
+              onBlur={() => setFocus(false)}
+              className="h-8 border-0 shadow-none ring-0 outline-0 outline-none focus:outline-0 focus-visible:ring-0"
+              placeholder={placeholder}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddItem();
+                }
+              }}
+              onChange={handleSearchQuery}
+            />
+            {query.length > 0 && (
+              <div
+                className={cn(
+                  focus && 'hover:bg-primary/20',
+                  'flex h-8 items-center justify-center',
+                )}
+              >
+                <Plus className="mx-2 size-4 cursor-pointer" onClick={handleAddItem} />
+              </div>
+            )}
+          </div>
+        )}
+        {selected.length > 0 && (
+          <div
+            className={cn(
+              selected.length > 0 && 'pt-2 pb-2',
+              'flex w-full flex-row flex-wrap gap-2 px-2',
+            )}
+          >
+            {selected
+              .sort((a, b) => a.localeCompare(b))
+              .map((item) => (
+                <div
+                  key={`selected-item-${item}`}
+                  title={item}
+                  className="bg-primary/15 flex h-6 cursor-pointer items-center justify-center gap-2 rounded-full px-2 py-1 text-center text-xs whitespace-nowrap"
+                >
+                  {item}
+                  <X
+                    className="hover:text-destructive size-3"
+                    onClick={() => setSelected([...selected.filter((fn) => fn !== item)])}
+                  />
+                </div>
+              ))}
+          </div>
+        )}
       </div>
+      {error && <p className="text-destructive text-sm">{error}</p>}
     </div>
   );
 };
