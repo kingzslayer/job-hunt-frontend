@@ -83,7 +83,7 @@ export const MultiSelectDropdown = ({
 
   const handleSearchQuery = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
-      setOpen(open);
+      handleSearchFocus(true);
     }
     setQuery(event.target.value);
     if (mode !== 'add') {
