@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { supabase } from '@/utils/supabase/client';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 const formSchema = z.object({
@@ -52,12 +52,24 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
         email: values.email,
         password: values.password,
       })
-      .then((res) => {
-        if (res.data.session) {
-          router.push('/home');
-        }
+      .then(async (res) => {
         if (res.error) {
           toast(res.error.message);
+          return;
+        }
+
+        const session = res.data.session;
+        const user = res.data.user;
+
+        if (session && user) {
+          const { data: profile } = await supabase
+            .from('users')
+            .select('onboarding_completed')
+            .eq('user_id', user.id)
+            .single();
+
+          const completed = profile?.onboarding_completed === true;
+          router.push(completed ? '/home' : '/onboarding');
         }
       });
     setIsLoading(null);

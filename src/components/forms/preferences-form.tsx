@@ -1,23 +1,25 @@
 'use client';
 
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { Input } from '../ui/input';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
-import { useRef, useState, type FormEvent } from 'react';
-import { Upload } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Upload } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Button } from '../ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
+import { UserRepo } from '@/lib/db/user';
 import { techSkills } from '@/lib/skills';
-import { toast } from 'sonner';
-import { MultiSelectDropdown } from '../common/dropdown';
-import { useRouter } from 'next/navigation';
 import { preferencesSchema, type PreferencesSchemaType } from '@/lib/validation';
 import { employeeJobTypes, jobExperienceLevels, workLocationTypes } from '@/lib/work-pref';
+import { supabase } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { MultiSelectDropdown } from '../common/dropdown';
 
 const tabs = ['personal', 'resume', 'job_preferences'];
 
@@ -65,6 +67,58 @@ export function PreferencesForm() {
     reValidateMode: 'onChange',
   });
 
+  useEffect(() => {
+    const loadProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile) {
+        form.reset({
+          personalInfo: {
+            first_name: profile.first_name ?? '',
+            last_name: profile.last_name ?? '',
+            email: profile.email ?? '',
+            phone: profile.phone ?? '',
+            address: profile.address ?? '',
+            degree: profile.degree ?? '',
+            course: profile.course ?? '',
+            university: profile.university ?? '',
+            graduated_year: profile.graduated_year ?? '',
+          },
+          jobPreferences: {
+            role: profile.role ?? '',
+            locations: profile.locations ?? [],
+            current_lpa: profile.current_lpa ?? '',
+            years_of_experience: profile.years_of_experience ?? '',
+            experience_level: profile.experience_level ?? [],
+            job_type: profile.job_type ?? [],
+            work_mode: profile.work_mode ?? [],
+            skills: profile.skills ?? [],
+          },
+        });
+
+        if (profile.resume) {
+          setResumeFile({
+            name: profile.resume.name,
+            size: 0,
+          } as File);
+        }
+      }
+    };
+
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const readFile = () => {
     if (fileInputRef.current?.files && fileInputRef.current?.files?.length > 0) {
       const file = fileInputRef.current.files[0];
@@ -102,15 +156,45 @@ export function PreferencesForm() {
   };
 
   async function onSubmit(values: z.infer<typeof preferencesSchema>) {
-    const data = {
-      ...values.personalInfo,
-      ...values.jobPreferences,
-    };
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    console.log('Form Data:', data);
-    document.cookie = 'onbording_completed=true; path=/';
-    toast.success('Preferences saved successfully!');
-    router.push('/home');
+      if (userError) throw userError;
+      if (!user) throw new Error('User not found');
+
+      let resumeMeta: { url: string; name: string; updated_at: string } | undefined;
+      if (resumeFile) {
+        const path = `${user.id}/${resumeFile.name}`;
+        await supabase.storage.from('resumes').upload(path, resumeFile, { upsert: true });
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('resumes').getPublicUrl(path);
+
+        resumeMeta = {
+          url: publicUrl,
+          name: resumeFile.name,
+          updated_at: new Date().toISOString(),
+        };
+      }
+
+      await UserRepo.saveProfile({
+        user_id: user.id,
+        ...values.personalInfo,
+        ...values.jobPreferences,
+        onboarding_completed: true,
+        ...(resumeMeta ? { resume: resumeMeta } : {}),
+      });
+
+      toast.success('Preferences saved successfully!');
+      router.push('/home');
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast.error('Failed to save preferences, please try again.');
+    }
   }
 
   const onNextTab = async () => {
@@ -361,7 +445,8 @@ export function PreferencesForm() {
                 />
                 {resumeFile && (
                   <span className="text-md font-bold">
-                    {resumeFile.name} ({formatFileSize(resumeFile.size)})
+                    {resumeFile.name}
+                    {resumeFile.size > 0 && ` (${formatFileSize(resumeFile.size)})`}
                   </span>
                 )}
                 <Button type="button" onClick={() => fileInputRef.current?.click()}>

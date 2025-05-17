@@ -5,6 +5,7 @@ import { Brain, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -17,9 +18,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { UserRepo } from '@/lib/db/user';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { supabase } from '@/utils/supabase/client';
+import Link from 'next/link';
 
 const formSchema = z
   .object({
@@ -59,11 +61,27 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
         email: values.email,
         password: values.password,
       })
-      .then((res) => {
-        if (res.data.session) {
-          router.push('/home');
-          document.cookie = 'onbording_completed=false; path=/';
+      .then(async (res) => {
+        if (res.error) throw res.error;
+
+        const user = res.data.user;
+        if (user) {
+          try {
+            await UserRepo.saveProfile({
+              user_id: user.id,
+              email: values.email,
+              onboarding_completed: false,
+            });
+
+            router.push('/onboarding');
+          } catch (e) {
+            console.error('Profile save error:', e);
+            toast('Failed to create profile. Please try again.');
+          }
         }
+      })
+      .catch((error) => {
+        console.error('Signup error:', error);
       });
 
     setIsLoading(null);
